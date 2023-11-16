@@ -2,21 +2,32 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:dev.sqlite"
+    provider = "sqlite"
+    url      = "file:dev.sqlite"
 }
 
 model Session {
-  id          String    @id
-  shop        String
-  state       String
-  isOnline    Boolean   @default(false)
-  scope       String?
-  expires     DateTime?
-  accessToken String
-  userId      BigInt?
+    id          String    @id
+    shop        String
+    state       String
+    isOnline    Boolean   @default(false)
+    scope       String?
+    expires     DateTime?
+    accessToken String
+    userId      BigInt?
+}
+
+model templates {
+    id         String    @id
+    name       String
+    image      String
+    data       String
+    status     Boolean   @default(true)
+    type       String
+    created_at DateTime?
+    updated_at DateTime?
 }

@@ -2,19 +2,19 @@
 
 name = "email-automation"
 client_id = "25857dad7be5378e4b51382635d110f3"
-application_url = "https://delivers-seen-economies-logos.trycloudflare.com"
+application_url = "https://bloomberg-software-antarctica-diff.trycloudflare.com"
 embedded = true
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products, read_products, read_customers"
+scopes = "write_products,read_products,read_customers"
 
 [auth]
 redirect_urls = [
-  "https://delivers-seen-economies-logos.trycloudflare.com/auth/callback",
-  "https://delivers-seen-economies-logos.trycloudflare.com/auth/shopify/callback",
-  "https://delivers-seen-economies-logos.trycloudflare.com/api/auth/callback",
-  "https://delivers-seen-economies-logos.trycloudflare.com/.shopify/graphiql/auth/callback"
+  "https://bloomberg-software-antarctica-diff.trycloudflare.com/auth/callback",
+  "https://bloomberg-software-antarctica-diff.trycloudflare.com/auth/shopify/callback",
+  "https://bloomberg-software-antarctica-diff.trycloudflare.com/api/auth/callback",
+  "https://bloomberg-software-antarctica-diff.trycloudflare.com/.shopify/graphiql/auth/callback"
 ]
 
 [webhooks]
