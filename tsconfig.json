@@ -1,5 +1,5 @@
 {
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["**/*.ts", "**/*.tsx", "app/graphql/client.js", "app/graphql/graphql.server.js", "app/graphql/mutation.js", "app/graphql/query.js", "app/graphql/resolver.server.js", "app/graphql/response.js", "app/graphql/schema.server.js"],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2019"],
     "strict": true,

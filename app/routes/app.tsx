@@ -1,21 +1,39 @@
 import type { HeadersFunction, LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Link, Outlet, useLoaderData, useRouteError } from "@remix-run/react";
+import { Link, Outlet, useLoaderData, useNavigate, useRouteError } from "@remix-run/react";
 import polarisStyles from "@shopify/polaris/build/esm/styles.css";
 import { boundary } from "@shopify/shopify-app-remix/server";
 import { AppProvider } from "@shopify/shopify-app-remix/react";
 import { authenticate } from "../shopify.server";
+import DefaultLayout from "~/components/layout/DefaultLayout";
+import axios from "axios";
 
 export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-    await authenticate.admin(request);
-
-    return json({ apiKey: process.env.SHOPIFY_API_KEY || "" });
+    const { session } = await authenticate.admin(request);
+    const config = {
+        headers: {
+            "X-Shopify-Access-Token": session.accessToken,
+            "Accept-Encoding": "application/json",
+        },
+    };
+    let shop = await axios.get(
+        `https://${session.shop}/admin/api/2023-10/shop.json`,
+        config
+    );
+    shop = shop.data.shop;
+    return json({ apiKey: process.env.SHOPIFY_API_KEY || "", shop });
 };
 
 export default function App() {
-    const { apiKey } = useLoaderData<typeof loader>();
+    const { apiKey, shop } = useLoaderData<typeof loader>();
+
+    const navigate = useNavigate();
+    const handleLogout = () => {
+        localStorage.removeItem('accessToken');
+        navigate('/');
+    }
 
     return (
         <AppProvider isEmbeddedApp apiKey={apiKey}>
@@ -28,7 +46,9 @@ export default function App() {
                 <Link to="/app/customers">Customer</Link>
                 <Link to="app/automation">Automation</Link>
             </ui-nav-menu>
-            <Outlet />
+            <DefaultLayout handleLogout={handleLogout} shop={shop}>
+                <Outlet />
+            </DefaultLayout>
         </AppProvider>
     );
 }

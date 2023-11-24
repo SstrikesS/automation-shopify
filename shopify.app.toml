@@ -2,7 +2,7 @@
 
 name = "email-automation"
 client_id = "25857dad7be5378e4b51382635d110f3"
-application_url = "https://bloomberg-software-antarctica-diff.trycloudflare.com"
+application_url = "https://inch-roads-im-fewer.trycloudflare.com"
 embedded = true
 
 [access_scopes]
@@ -11,10 +11,10 @@ scopes = "write_products,read_products,read_customers"
 
 [auth]
 redirect_urls = [
-  "https://bloomberg-software-antarctica-diff.trycloudflare.com/auth/callback",
-  "https://bloomberg-software-antarctica-diff.trycloudflare.com/auth/shopify/callback",
-  "https://bloomberg-software-antarctica-diff.trycloudflare.com/api/auth/callback",
-  "https://bloomberg-software-antarctica-diff.trycloudflare.com/.shopify/graphiql/auth/callback"
+  "https://inch-roads-im-fewer.trycloudflare.com/auth/callback",
+  "https://inch-roads-im-fewer.trycloudflare.com/auth/shopify/callback",
+  "https://inch-roads-im-fewer.trycloudflare.com/api/auth/callback",
+  "https://inch-roads-im-fewer.trycloudflare.com/.shopify/graphiql/auth/callback"
 ]
 
 [webhooks]

@@ -1,281 +1,211 @@
-import { useEffect } from "react";
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useActionData, useNavigation, useSubmit } from "@remix-run/react";
 import {
-  Page,
-  Layout,
-  Text,
-  Card,
-  Button,
-  BlockStack,
-  Box,
-  List,
-  Link,
-  InlineStack,
+    useLoaderData,
+    useSubmit,
+} from "@remix-run/react";
+import {
+    Page,
+    Card,
+    Button,
+    Form,
+    FormLayout,
+    TextField,
+    BlockStack,
 } from "@shopify/polaris";
+import type { LoaderFunctionArgs } from "@remix-run/node";
+
 import { authenticate } from "../shopify.server";
+import StoreModel from "~/models/store.model";
+import axios from "axios";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  await authenticate.admin(request);
-
-  return null;
-};
-
-export const action = async ({ request }: ActionFunctionArgs) => {
-  const { admin } = await authenticate.admin(request);
-  const color = ["Red", "Orange", "Yellow", "Green"][
-    Math.floor(Math.random() * 4)
-  ];
-  const response = await admin.graphql(
-    `#graphql
-      mutation populateProduct($input: ProductInput!) {
-        productCreate(input: $input) {
-          product {
-            id
-            title
-            handle
-            status
-            variants(first: 10) {
-              edges {
-                node {
-                  id
-                  price
-                  barcode
-                  createdAt
-                }
-              }
-            }
-          }
-        }
-      }`,
-    {
-      variables: {
-        input: {
-          title: `${color} Snowboard`,
-          variants: [{ price: Math.random() * 100 }],
+    const { session } = await authenticate.admin(request);
+    let shop;
+    const config = {
+        headers: {
+            "X-Shopify-Access-Token": session.accessToken,
+            "Accept-Encoding": "application/json",
         },
-      },
-    }
-  );
-  const responseJson = await response.json();
+    };
+    shop = await axios.get(
+        `https://${session.shop}/admin/api/2023-10/shop.json`,
+        config
+    );
+    shop = shop.data.shop;
+    const shopData = await StoreModel.findOneAndUpdate(
+        {
+            id: shop.id
+        },
+        {
+            id: shop.id,
+            name: shop.name,
+            email: shop.email,
+            shop: shop.name,
+            domain: shop.domain,
+            scope: session.scope,
+            country: shop.country_name,
+            customer_email: shop.customer_email,
+            myshopify_domain: shop.myshopify_domain,
+            plan_name: shop.plan_name,
+            plan_display_name: shop.plan_display_name,
+            shop_owner: shop.shop_owner,
+            iana_timezone: shop.iana_timezone,
+            currency: shop.currency,
+            address1: shop.address1 || "NULL",
+            address2: shop.address2 || "NULL",
+            phone: shop.phone || "NULL",
+            created_at: shop.created_at,
+            accessToken: session.accessToken,
+        },
+        {
+            upsert: true,
+        });
 
-  return json({
-    product: responseJson.data.productCreate.product,
-  });
+    return json({ shop: shopData });
 };
 
 export default function Index() {
-  const nav = useNavigation();
-  const actionData = useActionData<typeof action>();
-  const submit = useSubmit();
-  const isLoading =
-    ["loading", "submitting"].includes(nav.state) && nav.formMethod === "POST";
-  const productId = actionData?.product?.id.replace(
-    "gid://shopify/Product/",
-    ""
-  );
 
-  useEffect(() => {
-    if (productId) {
-      shopify.toast.show("Product created");
-    }
-  }, [productId]);
-  const generateProduct = () => submit({}, { replace: true, method: "POST" });
+    const { shop } = useLoaderData<any>();
+    const submit = useSubmit();
 
-  return (
-    <Page>
-      <ui-title-bar title="Remix app template">
-        <button variant="primary" onClick={generateProduct}>
-          Generate a product
-        </button>
-      </ui-title-bar>
-      <BlockStack gap="500">
-        <Layout>
-          <Layout.Section>
-            <Card>
-              <BlockStack gap="500">
-                <BlockStack gap="200">
-                  <Text as="h2" variant="headingMd">
-                    Congrats on creating a new Shopify app 🎉
-                  </Text>
-                  <Text variant="bodyMd" as="p">
-                    This embedded app template uses{" "}
-                    <Link
-                      url="https://shopify.dev/docs/apps/tools/app-bridge"
-                      target="_blank"
-                      removeUnderline
-                    >
-                      App Bridge
-                    </Link>{" "}
-                    interface examples like an{" "}
-                    <Link url="/app/additional" removeUnderline>
-                      additional page in the app nav
-                    </Link>
-                    , as well as an{" "}
-                    <Link
-                      url="https://shopify.dev/docs/api/admin-graphql"
-                      target="_blank"
-                      removeUnderline
-                    >
-                      Admin GraphQL
-                    </Link>{" "}
-                    mutation demo, to provide a starting point for app
-                    development.
-                  </Text>
-                </BlockStack>
-                <BlockStack gap="200">
-                  <Text as="h3" variant="headingMd">
-                    Get started with products
-                  </Text>
-                  <Text as="p" variant="bodyMd">
-                    Generate a product with GraphQL and get the JSON output for
-                    that product. Learn more about the{" "}
-                    <Link
-                      url="https://shopify.dev/docs/api/admin-graphql/latest/mutations/productCreate"
-                      target="_blank"
-                      removeUnderline
-                    >
-                      productCreate
-                    </Link>{" "}
-                    mutation in our API references.
-                  </Text>
-                </BlockStack>
-                <InlineStack gap="300">
-                  <Button loading={isLoading} onClick={generateProduct}>
-                    Generate a product
-                  </Button>
-                  {actionData?.product && (
-                    <Button
-                      url={`shopify:admin/products/${productId}`}
-                      target="_blank"
-                      variant="plain"
-                    >
-                      View product
-                    </Button>
-                  )}
-                </InlineStack>
-                {actionData?.product && (
-                  <Box
-                    padding="400"
-                    background="bg-surface-active"
-                    borderWidth="025"
-                    borderRadius="200"
-                    borderColor="border"
-                    overflowX="scroll"
-                  >
-                    <pre style={{ margin: 0 }}>
-                      <code>{JSON.stringify(actionData.product, null, 2)}</code>
-                    </pre>
-                  </Box>
-                )}
-              </BlockStack>
-            </Card>
-          </Layout.Section>
-          <Layout.Section variant="oneThird">
+    return (
+        <Page>
             <BlockStack gap="500">
-              <Card>
-                <BlockStack gap="200">
-                  <Text as="h2" variant="headingMd">
-                    App template specs
-                  </Text>
-                  <BlockStack gap="200">
-                    <InlineStack align="space-between">
-                      <Text as="span" variant="bodyMd">
-                        Framework
-                      </Text>
-                      <Link
-                        url="https://remix.run"
-                        target="_blank"
-                        removeUnderline
-                      >
-                        Remix
-                      </Link>
-                    </InlineStack>
-                    <InlineStack align="space-between">
-                      <Text as="span" variant="bodyMd">
-                        Database
-                      </Text>
-                      <Link
-                        url="https://www.prisma.io/"
-                        target="_blank"
-                        removeUnderline
-                      >
-                        Prisma
-                      </Link>
-                    </InlineStack>
-                    <InlineStack align="space-between">
-                      <Text as="span" variant="bodyMd">
-                        Interface
-                      </Text>
-                      <span>
-                        <Link
-                          url="https://polaris.shopify.com"
-                          target="_blank"
-                          removeUnderline
-                        >
-                          Polaris
-                        </Link>
-                        {", "}
-                        <Link
-                          url="https://shopify.dev/docs/apps/tools/app-bridge"
-                          target="_blank"
-                          removeUnderline
-                        >
-                          App Bridge
-                        </Link>
-                      </span>
-                    </InlineStack>
-                    <InlineStack align="space-between">
-                      <Text as="span" variant="bodyMd">
-                        API
-                      </Text>
-                      <Link
-                        url="https://shopify.dev/docs/api/admin-graphql"
-                        target="_blank"
-                        removeUnderline
-                      >
-                        GraphQL API
-                      </Link>
-                    </InlineStack>
-                  </BlockStack>
-                </BlockStack>
-              </Card>
-              <Card>
-                <BlockStack gap="200">
-                  <Text as="h2" variant="headingMd">
-                    Next steps
-                  </Text>
-                  <List>
-                    <List.Item>
-                      Build an{" "}
-                      <Link
-                        url="https://shopify.dev/docs/apps/getting-started/build-app-example"
-                        target="_blank"
-                        removeUnderline
-                      >
-                        {" "}
-                        example app
-                      </Link>{" "}
-                      to get started
-                    </List.Item>
-                    <List.Item>
-                      Explore Shopify’s API with{" "}
-                      <Link
-                        url="https://shopify.dev/docs/apps/tools/graphiql-admin-api"
-                        target="_blank"
-                        removeUnderline
-                      >
-                        GraphiQL
-                      </Link>
-                    </List.Item>
-                  </List>
-                </BlockStack>
-              </Card>
+                <Card>
+                    <Form onSubmit={() => submit({}, { replace: true, method: "GET" })}>
+                        <FormLayout>
+                            <TextField
+                                label="Shop id"
+                                value={shop.id}
+                                type="password"
+                                autoComplete="text"
+                            />
+
+                            <TextField
+                                label="Shop name"
+                                value={shop.name}
+                                type="text"
+                                autoComplete="text"
+                            />
+
+                            <TextField
+                                label="Shop email"
+                                value={shop.email}
+                                type="email"
+                                autoComplete="email"
+                            />
+
+                            <TextField
+                                label="Shop domain"
+                                value={shop.domain}
+                                type="text"
+                                autoComplete="text"
+                            />
+
+                            <TextField
+                                label="Shop scope"
+                                value={shop.domain}
+                                type="text"
+                                autoComplete="text"
+                            />
+
+                            <TextField
+                                label="Shop country"
+                                value={shop.domain}
+                                type="text"
+                                autoComplete="text"
+                            />
+
+                            <TextField
+                                label="Shop customer email"
+                                value={shop.domain}
+                                type="text"
+                                autoComplete="text"
+                            />
+
+                            <TextField
+                                label="Shop my shopify domain"
+                                value={shop.myshopify_domain}
+                                type="text"
+                                autoComplete="text"
+                            />
+
+                            <TextField
+                                label="Shop plan name"
+                                value={shop.plan_name}
+                                type="text"
+                                autoComplete="text"
+                            />
+
+                            <TextField
+                                label="Shop plan display name"
+                                value={shop.plan_display_name}
+                                type="text"
+                                autoComplete="text"
+                            />
+
+                            <TextField
+                                label="Shop shop owner"
+                                value={shop.shop_owner}
+                                type="text"
+                                autoComplete="text"
+                            />
+
+                            <TextField
+                                label="Shop iana timezone"
+                                value={shop.iana_timezone}
+                                type="text"
+                                autoComplete="text"
+                            />
+
+                            <TextField
+                                label="Shop currency"
+                                value={shop.currency}
+                                type="text"
+                                autoComplete="text"
+                            />
+
+                            <TextField
+                                label="Shop address1"
+                                value={shop.address1}
+                                type="text"
+                                autoComplete="text"
+                            />
+
+                            <TextField
+                                label="Shop address2"
+                                value={shop.address2}
+                                type="text"
+                                autoComplete="text"
+                            />
+
+                            <TextField
+                                label="Shop phone"
+                                value={shop.phone}
+                                type="text"
+                                autoComplete="text"
+                            />
+
+                            <TextField
+                                label="Shop created at"
+                                value={shop.created_at}
+                                type="text"
+                                autoComplete="text"
+                            />
+
+                            <TextField
+                                label="Shop access token"
+                                value={shop.accessToken}
+                                type="text"
+                                autoComplete="text"
+                            />
+
+                            <Button submit>Submit</Button>
+                        </FormLayout>
+                    </Form>
+                </Card>
             </BlockStack>
-          </Layout.Section>
-        </Layout>
-      </BlockStack>
-    </Page>
-  );
+        </Page>
+    );
 }

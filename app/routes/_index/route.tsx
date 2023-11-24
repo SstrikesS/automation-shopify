@@ -1,54 +1,95 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
-import { login } from "../../shopify.server";
+import { redirect } from "@remix-run/node";
+import { useNavigate } from "@remix-run/react";
+
 import indexStyles from "./style.css";
+import {
+    AppProvider,
+    Button,
+    Page,
+    FormLayout,
+    TextField,
+    Card,
+    Spinner
+} from "@shopify/polaris";
+import { useState } from "react";
+import { useMutation } from "@apollo/client";
+import type { LoaderFunctionArgs } from "@remix-run/node";
+import { LOGIN_MUTATION } from "~/graphql/mutation";
 
 export const links = () => [{ rel: "stylesheet", href: indexStyles }];
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const url = new URL(request.url);
+export async function loader({ request }: LoaderFunctionArgs) {
+    const url = new URL(request.url);
+    if (url.searchParams.get("shop")) {
+        throw redirect(`/app?${url.searchParams.toString()}`);
+    }
 
-  if (url.searchParams.get("shop")) {
-    throw redirect(`/app?${url.searchParams.toString()}`);
-  }
-
-  return json({ showForm: Boolean(login) });
-};
-
+    return null;
+}
 export default function App() {
-  const { showForm } = useLoaderData<typeof loader>();
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
 
-  return (
-    <div className="index">
-      <div className="content">
-        <h1>A short heading about [your app]</h1>
-        <p>A tagline about [your app] that describes your value proposition.</p>
-        {showForm && (
-          <Form method="post" action="/auth/login">
-            <label>
-              <span>Shop domain</span>
-              <input type="text" name="shop" />
-              <span>e.g: my-shop-domain.myshopify.com</span>
-            </label>
-            <button type="submit">Log in</button>
-          </Form>
-        )}
-        <ul>
-          <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
-          </li>
-          <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
-          </li>
-          <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
-          </li>
-        </ul>
-      </div>
-    </div>
-  );
+    const [login] = useMutation(LOGIN_MUTATION);
+
+    const handleLogin = async () => {
+        try {
+            setIsLoading(true);
+            const response = await login({
+                variables: {
+                    input: {
+                        username,
+                        password,
+                    }
+                }
+            });
+            setIsLoading(false);
+            if (response.data.login) {
+                localStorage.setItem('accessToken', response.data.login);
+                navigate('/admin');
+            } else {
+                throw new Error('Some error occured');
+            }
+        } catch (err: any) {
+            setError(err);
+            setIsLoading(false);
+        }
+    }
+
+    return (
+        <AppProvider i18n={require('@shopify/polaris/locales/en.json')}>
+            <div className="center-form">
+                <Page>
+                    <Card>
+                        {
+                            error ? (
+                                <p style={{ textAlign: 'center', color: 'red' }}>{error.message}</p>
+                            ) : null
+                        }
+                        {
+                            isLoading ? (<p style={{ textAlign: 'center', color: 'red' }}>
+                                <Spinner />
+                            </p>) : null
+                        }
+                        <FormLayout>
+                            <TextField label="Username" value={username} onChange={(e) => setUsername(e)} autoComplete="off" />
+                            <TextField
+                                type="password"
+                                value={password}
+                                label="Password"
+                                onChange={(e) => setPassword(e)}
+                                autoComplete="off"
+                            />
+                            <Button onClick={handleLogin}>
+                                Login
+                            </Button>
+                        </FormLayout>
+                    </Card>
+                </Page>
+            </div>
+        </AppProvider>
+    )
 }

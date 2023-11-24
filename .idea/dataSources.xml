@@ -8,5 +8,20 @@
       <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/prisma/dev.sqlite</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="Project-Lich-Trinh" uuid="d05dae8e-3494-46b0-8482-ece4cdd340f7">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://222.252.10.203:31120/postgres</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+      <time-zone>Etc/GMT+7</time-zone>
+    </data-source>
+    <data-source source="LOCAL" name="Project-Lich-Trinh-Redis" uuid="f6d6436d-e54c-4650-a915-e84458a01bac">
+      <driver-ref>redis</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>jdbc.RedisDriver</jdbc-driver>
+      <jdbc-url>jdbc:redis://222.252.10.203:31121/0</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>
