@@ -1,25 +1,44 @@
 {
-  "include": ["**/*.ts", "**/*.tsx", "app/graphql/client.js", "app/graphql/graphql.server.js", "app/graphql/mutation.js", "app/graphql/query.js", "app/graphql/resolver.server.js", "app/graphql/response.js", "app/graphql/schema.server.js"],
-  "compilerOptions": {
-    "lib": ["DOM", "DOM.Iterable", "ES2019"],
-    "strict": true,
-    "skipLibCheck": true,
-    "isolatedModules": true,
-    "allowSyntheticDefaultImports": true,
-    "removeComments": false,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "allowJs": true,
-    "jsx": "react-jsx",
-    "module": "Node16",
-    "moduleResolution": "Node16",
-    "target": "ES2019",
-    "baseUrl": ".",
-    "paths": {
-      "~/*": ["./app/*"]
-    },
-    "types": [
-      "node", "@shopify/app-bridge-types"
-    ]
-  }
+    "include": [
+        "**/*.ts",
+        "**/*.tsx",
+        "app/graphql/client.js",
+        "app/graphql/graphql.server.js",
+        "app/graphql/mutation.js",
+        "app/graphql/query.js",
+        "app/graphql/resolver.server.js",
+        "app/graphql/response.js",
+        "app/graphql/schema.server.js"
+    ],
+    "compilerOptions": {
+        "lib": [
+            "DOM",
+            "DOM.Iterable",
+            "ES2019"
+        ],
+        "strict": true,
+        "skipLibCheck": true,
+        "isolatedModules": true,
+        "allowSyntheticDefaultImports": true,
+        "removeComments": false,
+        "forceConsistentCasingInFileNames": true,
+        "noEmit": true,
+        "allowJs": true,
+        "jsx": "react-jsx",
+        "module": "Node16",
+        "moduleResolution": "Node16",
+        "target": "ES2019",
+        "baseUrl": ".",
+        "paths": {
+            "~/*": [
+                "./app/*"
+            ]
+        },
+        "types": [
+            "node",
+            "@shopify/app-bridge-types"
+        ],
+        "resolveJsonModule": true,
+        "esModuleInterop": true
+    }
 }

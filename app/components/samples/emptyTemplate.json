@@ -1,22 +1,5 @@
-
-
-export interface QueryFilter {
-    limit: number, // gioi han so luong items tra ve
-    page: number, // trang hien tai
-    sort: 'asc' | 'desc', // sap xep tu nho den lon (asc) va nguoc lai
-    sort_by: 'name' | 'created_at' | 'updated_at' | 'id',
-    key: string,
-    type: string,
-    status: true | false
-}
-
-export function getMerchantInitials(merchant_name: string) {
-    let initials = merchant_name.charAt(0);
-    return initials.toUpperCase();
-}
-
-export const emptyTemplate = {
-    "counters": {
+{
+     "counters": {
         "u_column": 1,
         "u_row": 1
     },

@@ -1,12 +1,10 @@
+import { json } from "@remix-run/node";
 import mongoose from "mongoose";
+import { emptyTemplate } from "~/helpers";
 
 const Schema = mongoose.Schema;
 
-const TemplateSchema = new Schema({
-    id: {
-        type: String,
-        require: true,
-    },
+export const TemplateSchema = new Schema({
     name: {
         type: String,
         require: true,
@@ -26,40 +24,76 @@ const TemplateSchema = new Schema({
     type: {
         type: String,
         require: true,
+    },
+    store_id: {
+        type: String,
+        require: true,
     }
-}, {
-    timestamps: true,
 })
 
-export default mongoose.model('Template', TemplateSchema);
+const testSchema = new Schema({
+    title: String,
+    body: String
+});
 
-export interface Template {
-    _id: string,
-    name: string,
-    image: string,
-    data: object,
-    status: boolean,
-    type: 'Custom' | 'Recommend',
+export const templateModel = mongoose.model('templates', TemplateSchema);
+
+const testModel = mongoose.model('test', testSchema);
+export async function CreateTemplate(shop: any) {
+    // const newTemplate = new templateModel({
+    //     name: "undefined",
+    //     image: "",
+    //     data: emptyTemplate,
+    //     status: true,
+    //     type: "Custom",
+    //     store_id: shop.id
+    // });
+
+    // await newTemplate.save().then(() => {
+    //     return json({ newTemplate });
+    // }).catch((e: any) => {
+    //     console.log((e));
+    //     return null;
+    // })
+    // console.log(templateModel);
+    // const newTemplate: any = templateModel.create({
+    //     name: "undefined",
+    //     image: "",
+    //     data: emptyTemplate,
+    //     status: true,
+    //     type: "Custom",
+    //     store_id: shop.id
+    // }).then(() => {
+    //     return json({ newTemplate });
+    // }).catch((e: any) => {
+    //     console.log(e)
+    //     return null;
+    // })
+
+    testModel.create({
+        body: 'bb',
+        title: 'ttt'
+    }).then(() => { }).catch((e: any) => { console.log(e) });
 }
 
-// export async function getTemplates(filter: QueryFilter) {
-//     const query = await Model.find({
-//         type: filter.type,
-//         name: {
-//             $regex: '.*' + filter.key + '.*'
-//         },
-//     }).limit(filter.limit).skip(filter.limit * (filter.page - 1)).exec();
+export async function CopyTemplate(shop: any, template: any) {
+    const newTemplate = new templateModel({
+        name: `Copy of ${template.name}`,
+        image: "",
+        data: template.data,
+        status: true,
+        type: "Custom",
+        store_id: shop.id
+    });
 
-//     const count = await Model.find({
-//         type: filter.type,
-//         name: {
-//             $regex: '.*' + filter.key + '.*'
-//         },
-//     }).countDocuments();
-//     return {
-//         templates: query,
-//         currentPage: filter.page,
-//         totalPage: Math.ceil(count / filter.limit),
-//         total: count
-//     }
+    await newTemplate.save().then(() => {
+        return json({ newTemplate });
+    }).catch((e: any) => {
+        console.log((e));
+        return null;
+    })
+}
+
+// export async function updateTemplate() {
+
 // }

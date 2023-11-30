@@ -41,7 +41,8 @@ const shopify = shopifyApp({
         : {}),
 });
 
-const dbConnectionString = "mongodb://localhost:27017/GR1-email-template";
+const dbConnectionString = "mongodb+srv://admin:20194677@cluster0.tytl7jo.mongodb.net/mongodb_gr?retryWrites=true&w=majority";
+// const dbConnectionString = "mongodb://localhost:27017/GR1-email-template";
 mongoose.set("debug", true);
 mongoose.set("debug", { color: true });
 mongoose
