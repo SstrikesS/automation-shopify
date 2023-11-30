@@ -2,7 +2,7 @@
 
 name = "email-automation"
 client_id = "25857dad7be5378e4b51382635d110f3"
-application_url = "https://rehabilitation-loads-split-hiking.trycloudflare.com"
+application_url = "https://married-munich-number-acre.trycloudflare.com"
 embedded = true
 
 [access_scopes]
@@ -11,10 +11,10 @@ scopes = "write_products,read_products,read_customers"
 
 [auth]
 redirect_urls = [
-  "https://rehabilitation-loads-split-hiking.trycloudflare.com/auth/callback",
-  "https://rehabilitation-loads-split-hiking.trycloudflare.com/auth/shopify/callback",
-  "https://rehabilitation-loads-split-hiking.trycloudflare.com/api/auth/callback",
-  "https://rehabilitation-loads-split-hiking.trycloudflare.com/.shopify/graphiql/auth/callback"
+  "https://married-munich-number-acre.trycloudflare.com/auth/callback",
+  "https://married-munich-number-acre.trycloudflare.com/auth/shopify/callback",
+  "https://married-munich-number-acre.trycloudflare.com/api/auth/callback",
+  "https://married-munich-number-acre.trycloudflare.com/.shopify/graphiql/auth/callback"
 ]
 
 [webhooks]

@@ -12,6 +12,7 @@ import {
     Spinner
 } from "@shopify/polaris";
 import { useState } from "react";
+// @ts-ignore
 import { useMutation } from "@apollo/client";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { LOGIN_MUTATION } from "~/graphql/mutation";
@@ -66,7 +67,7 @@ export default function App() {
                     <Card>
                         {
                             error ? (
-                                <p style={{ textAlign: 'center', color: 'red' }}>{error.message}</p>
+                                <p style={{ textAlign: 'center', color: 'red' }}>{error}</p>
                             ) : null
                         }
                         {

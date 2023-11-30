@@ -31,30 +31,24 @@ export const TemplateSchema = new Schema({
     }
 })
 
-const testSchema = new Schema({
-    title: String,
-    body: String
-});
-
 export const templateModel = mongoose.model('templates', TemplateSchema);
 
-const testModel = mongoose.model('test', testSchema);
 export async function CreateTemplate(shop: any) {
-    // const newTemplate = new templateModel({
-    //     name: "undefined",
-    //     image: "",
-    //     data: emptyTemplate,
-    //     status: true,
-    //     type: "Custom",
-    //     store_id: shop.id
-    // });
+    const newTemplate = new templateModel({
+        name: "undefined",
+        image: "",
+        data: emptyTemplate,
+        status: true,
+        type: "Custom",
+        store_id: shop.id
+    });
 
-    // await newTemplate.save().then(() => {
-    //     return json({ newTemplate });
-    // }).catch((e: any) => {
-    //     console.log((e));
-    //     return null;
-    // })
+    await newTemplate.save().then(() => {
+        return json({ newTemplate });
+    }).catch((e: any) => {
+        console.log((e));
+        return null;
+    })
     // console.log(templateModel);
     // const newTemplate: any = templateModel.create({
     //     name: "undefined",
@@ -69,11 +63,6 @@ export async function CreateTemplate(shop: any) {
     //     console.log(e)
     //     return null;
     // })
-
-    testModel.create({
-        body: 'bb',
-        title: 'ttt'
-    }).then(() => { }).catch((e: any) => { console.log(e) });
 }
 
 export async function CopyTemplate(shop: any, template: any) {
