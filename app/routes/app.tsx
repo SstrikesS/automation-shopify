@@ -1,17 +1,17 @@
-import type { HeadersFunction, LoaderFunctionArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { Link, Outlet, useLoaderData, useNavigate, useRouteError } from "@remix-run/react";
+import type {HeadersFunction, LoaderFunctionArgs} from "@remix-run/node";
+import {json} from "@remix-run/node";
+import {Link, Outlet, useLoaderData, useNavigate, useRouteError} from "@remix-run/react";
 import polarisStyles from "@shopify/polaris/build/esm/styles.css";
-import { boundary } from "@shopify/shopify-app-remix/server";
-import { AppProvider } from "@shopify/shopify-app-remix/react";
-import { authenticate } from "../shopify.server";
+import {boundary} from "@shopify/shopify-app-remix/server";
+import {AppProvider} from "@shopify/shopify-app-remix/react";
+import {authenticate} from "../shopify.server";
 import DefaultLayout from "~/components/layout/DefaultLayout";
 import axios from "axios";
 
-export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
+export const links = () => [{rel: "stylesheet", href: polarisStyles}];
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-    const { session } = await authenticate.admin(request);
+export const loader = async ({request}: LoaderFunctionArgs) => {
+    const {session} = await authenticate.admin(request);
     const config = {
         headers: {
             "X-Shopify-Access-Token": session.accessToken,
@@ -23,11 +23,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         config
     );
     shop = shop.data.shop;
-    return json({ apiKey: process.env.SHOPIFY_API_KEY || "", shop });
+    return json({apiKey: process.env.SHOPIFY_API_KEY || "", shop});
 };
 
 export default function App() {
-    const { apiKey, shop } = useLoaderData<typeof loader>();
+    const {apiKey, shop} = useLoaderData<typeof loader>();
 
     const navigate = useNavigate();
     const handleLogout = () => {
@@ -42,12 +42,13 @@ export default function App() {
                     Home
                 </Link>
                 <Link to="/app/templates">Templates</Link>
+                <Link to="/app/sampleTemplate">Sample Template</Link>
                 <Link to="/app/flows">Flows</Link>
                 <Link to="/app/customers">Customer</Link>
                 <Link to="app/automation">Automation</Link>
             </ui-nav-menu>
             <DefaultLayout handleLogout={handleLogout} shop={shop}>
-                <Outlet />
+                <Outlet/>
             </DefaultLayout>
         </AppProvider>
     );

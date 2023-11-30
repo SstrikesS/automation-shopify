@@ -7,7 +7,9 @@ import {
     ScrollRestoration,
 } from "@remix-run/react";
 
+// @ts-ignore
 import { setContext } from '@apollo/client/link/context';
+// @ts-ignore
 import { ApolloClient, ApolloProvider, InMemoryCache, createHttpLink } from "@apollo/client";
 
 export default function App() {
@@ -33,12 +35,13 @@ export default function App() {
         link: authLink.concat(httpLink),
         cache: new InMemoryCache(),
     });
+    // @ts-ignore
     return (
         <html>
             <head>
                 <meta charSet="utf-8" />
                 <meta name="viewport" content="width=device-width,initial-scale=1" />
-                <link rel="stylesheet" href="https://unpkg.com/@shopify/polaris@11.1.2/build/esm/styles.css" onLoad='this.media="all"'></link>
+                <link rel="stylesheet" href="https://unpkg.com/@shopify/polaris@11.1.2/build/esm/styles.css"></link>
                 {/* <link rel="stylesheet" href="./routes/_index/style.css" onload='this.media="all"'></link> */}
                 <Meta />
                 <Links />

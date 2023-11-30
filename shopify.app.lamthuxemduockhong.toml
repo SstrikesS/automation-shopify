@@ -1,0 +1,28 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+name = "lamthuxemduockhong"
+client_id = "a33def8b740689609efe2df6ea6f4f1b"
+application_url = "https://species-horizon-particular-threat.trycloudflare.com"
+embedded = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "write_products,read_products,read_customers"
+
+[auth]
+redirect_urls = [
+  "https://species-horizon-particular-threat.trycloudflare.com/auth/callback",
+  "https://species-horizon-particular-threat.trycloudflare.com/auth/shopify/callback",
+  "https://species-horizon-particular-threat.trycloudflare.com/api/auth/callback",
+  "https://species-horizon-particular-threat.trycloudflare.com/.shopify/graphiql/auth/callback"
+]
+
+[webhooks]
+api_version = "2023-10"
+
+[pos]
+embedded = false
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "email-automation-new.myshopify.com"
