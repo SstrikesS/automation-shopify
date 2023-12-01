@@ -3,7 +3,7 @@ import { EditMajor, CircleCancelMajor, CirclePlusMajor } from '@shopify/polaris-
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData, useNavigate } from "@remix-run/react";
-import { templateModel, CreateTemplate } from "~/models/templates.model";
+import { templateModel } from "~/models/templates.model";
 import { authenticate } from "~/shopify.server";
 import storeModel from "~/models/store.model";
 
@@ -45,8 +45,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export default function TemplatesPage() {
     // Lay du lieu tu ham loader
     const navigate = useNavigate();
-    const { data, currentPage, totalPage, total, shop } = useLoaderData<typeof loader>();
-    console.log({ data, currentPage, totalPage, total, shop });
+    const { data } = useLoaderData<typeof loader>();
 
     const EmptyTemplateState = ({ onAction }: any) => (
         <EmptyState
@@ -60,15 +59,6 @@ export default function TemplatesPage() {
         </EmptyState>
     )
 
-    const handleCreateTemplate = async () => {
-        const newTemplate: any = await CreateTemplate(shop);
-
-        if (newTemplate) {
-            navigate(`../app/template/${newTemplate._id}`);
-        } else {
-            //handle error
-        }
-    };
     return (
         <Page fullWidth>
             <Layout>
@@ -93,7 +83,7 @@ export default function TemplatesPage() {
                                         title="Blank template"
                                         primaryAction={{
                                             content: 'Create a new template',
-                                            onAction: handleCreateTemplate,
+                                            onAction: () => { navigate(`../template/new`); },
                                             icon: CirclePlusMajor,
                                         }}
                                         description="Custom"
@@ -118,7 +108,7 @@ export default function TemplatesPage() {
                                             title={value.name}
                                             primaryAction={{
                                                 content: 'Open and Edit',
-                                                onAction: () => { },
+                                                onAction: () => { navigate(`../template/${value._id}`); },
                                                 icon: EditMajor,
                                             }}
                                             description={value.type}

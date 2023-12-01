@@ -1,6 +1,4 @@
-import { json } from "@remix-run/node";
 import mongoose from "mongoose";
-import { emptyTemplate } from "~/helpers";
 
 const Schema = mongoose.Schema;
 
@@ -33,22 +31,28 @@ export const TemplateSchema = new Schema({
 
 export const templateModel = mongoose.model('templates', TemplateSchema);
 
-export async function CreateTemplate(shop: any) {
-    const newTemplate = new templateModel({
-        name: "undefined",
-        image: "",
-        data: emptyTemplate,
-        status: true,
-        type: "Custom",
-        store_id: shop.id
-    });
+export async function CreateTemplate(template: any) {
+    const newTemplate = new templateModel(template);
 
-    await newTemplate.save().then(() => {
-        return json({ newTemplate });
-    }).catch((e: any) => {
-        console.log((e));
+    try {
+        const data = await templateModel.create({
+            newTemplate,
+        })
+
+        console.log(data);
+
+        if (data) {
+            return data;
+
+        } else {
+
+            return null;
+        }
+    } catch (error) {
+        console.error(error);
+
         return null;
-    })
+    }
     // console.log(templateModel);
     // const newTemplate: any = templateModel.create({
     //     name: "undefined",
@@ -65,22 +69,49 @@ export async function CreateTemplate(shop: any) {
     // })
 }
 
-export async function CopyTemplate(shop: any, template: any) {
+export async function CopyTemplate(template: any) {
     const newTemplate = new templateModel({
         name: `Copy of ${template.name}`,
         image: "",
         data: template.data,
         status: true,
         type: "Custom",
-        store_id: shop.id
+        store_id: template.store_id,
     });
 
-    await newTemplate.save().then(() => {
-        return json({ newTemplate });
-    }).catch((e: any) => {
-        console.log((e));
+    try {
+        const data = await templateModel.create({
+            newTemplate,
+        });
+
+        if (data) {
+            return data;
+
+        } else {
+
+            return null;
+        }
+    } catch (error) {
+        console.error(error);
+
         return null;
-    })
+    }
+}
+
+export async function getTemplate(id: string) {
+    try {
+        const data = await templateModel.findById(id);
+
+        if (data) {
+            return data;
+        } else {
+
+            return null;
+        }
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
 }
 
 // export async function updateTemplate() {

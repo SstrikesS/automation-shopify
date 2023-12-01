@@ -1,13 +1,13 @@
 
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 
 import type { EditorRef, EmailEditorProps } from "react-email-editor";
 import EmailEditor from "react-email-editor";
-import sample from "../samples/sample.json";
 import { ProductInfo, ProductGrid, ButtonCustom, DegistBlock, LogoBlock, ImageGallery } from "../blocks/block";
-export default function EmailTemplateEitor() {
+export default function EmailTemplateEditor(props: { template: any }) {
 
     const emailEditorRef = useRef<EditorRef | null>(null);
+    const template = props.template;
     // const [preview, setPreview] = useState(false);
 
     // const saveDesign = () => {
@@ -51,7 +51,7 @@ export default function EmailTemplateEitor() {
     const onLoad: EmailEditorProps['onLoad'] = (unlayer) => {
         console.log('onLoad', unlayer);
         unlayer.addEventListener('design:loaded', onDesignLoad);
-        unlayer.loadDesign(sample);
+        unlayer.loadDesign(template.data);
     }
     return (
         <EmailEditor
