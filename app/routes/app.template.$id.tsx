@@ -1,5 +1,5 @@
 import { json, redirect } from "@remix-run/node";
-import { Card, Text } from "@shopify/polaris";
+import { Card } from "@shopify/polaris";
 import { ClientOnly } from "remix-utils/client-only";
 import EmailTemplateEditor from "~/components/layout/EmailEditor.client";
 import { emptyTemplate } from "~/helpers";
@@ -7,6 +7,7 @@ import storeModel from "~/models/store.model";
 import { authenticate } from "~/shopify.server";
 import { getTemplate, CopyTemplate, CreateTemplate } from "~/models/templates.model";
 import { useLoaderData } from "@remix-run/react";
+
 export async function loader({ request, params }: any) {
     const { session } = await authenticate.admin(request);
 
@@ -38,10 +39,8 @@ export async function loader({ request, params }: any) {
                     type: "Custom",
                     store_id: shop.id,
                 });
-
                 return redirect(`../template/${newTemplate?._id}`);
             } else {
-
                 return json({ template: template, navigate: false, });
             }
         }
@@ -55,20 +54,11 @@ export async function loader({ request, params }: any) {
 export default function TemplatePage() {
     const data = useLoaderData<typeof loader>();
 
-    return (
-        <div>
+        return (
             <Card>
-                <div style={{
-                    height: "80px",
-                }}>
-                    <Text variant="headingLg" as="h5" alignment="start">
-                        Edit Templates
-                    </Text>
-                </div>
                 <ClientOnly fallback={null}>
-                    {() => <EmailTemplateEditor template={data?.template} />}
-                </ClientOnly>
+                {() => <EmailTemplateEditor template={data?.template} />}
+                    </ClientOnly>
             </Card>
-        </div >
-    )
+        )
 }
