@@ -1,8 +1,21 @@
 import mongoose from "mongoose";
+import type { Document, Model } from "mongoose";
 
 const Schema = mongoose.Schema;
 
-export const TemplateSchema = new Schema({
+export type TemplateType = {
+    _id?: any,
+    name?: String | null,
+    image?: String | null,
+    data?: Record<string, any>,
+    status?: Boolean | null,
+    type?: String | null,
+    store_id?: String | null,
+    createdAt?: NativeDate,
+    updatedAt?: NativeDate,
+}
+
+export const TemplateSchema = new Schema<TemplateDocument, TemplateModel>({
     name: {
         type: String,
         require: true,
@@ -27,70 +40,47 @@ export const TemplateSchema = new Schema({
         type: String,
         require: true,
     }
+}, {
+    timestamps: true,
 })
 
-export const templateModel = mongoose.model('templates', TemplateSchema);
+export interface TemplateDocument extends Document, TemplateType { }
 
-export async function CreateTemplate(template: any) {
-    const newTemplate = new templateModel(template);
+export interface TemplateModel extends Model<TemplateDocument> { }
 
+export const templateModel = mongoose.model<TemplateDocument, TemplateModel>('templates', TemplateSchema);
+
+export async function CreateTemplate(template: TemplateType) {
     try {
         const data = await templateModel.create({
-            newTemplate,
-        })
+            name: template.name,
+            image: template.image,
+            data: template.data,
+            status: template.status,
+            type: template.type,
+            store_id: template.store_id,
+        }) as TemplateType
 
-        console.log(data);
-
-        if (data) {
-            return data;
-
-        } else {
-
-            return null;
-        }
+        return data;
     } catch (error) {
         console.error(error);
 
         return null;
     }
-    // console.log(templateModel);
-    // const newTemplate: any = templateModel.create({
-    //     name: "undefined",
-    //     image: "",
-    //     data: emptyTemplate,
-    //     status: true,
-    //     type: "Custom",
-    //     store_id: shop.id
-    // }).then(() => {
-    //     return json({ newTemplate });
-    // }).catch((e: any) => {
-    //     console.log(e)
-    //     return null;
-    // })
 }
 
-export async function CopyTemplate(template: any) {
-    const newTemplate = new templateModel({
-        name: `Copy of ${template.name}`,
-        image: "",
-        data: template.data,
-        status: true,
-        type: "Custom",
-        store_id: template.store_id,
-    });
-
+export async function CopyTemplate(template: TemplateType) {
     try {
         const data = await templateModel.create({
-            newTemplate,
-        });
+            name: `Copy of ${template.name}`,
+            image: "",
+            data: template.data,
+            status: true,
+            type: "Custom",
+            store_id: template.store_id,
+        }) as TemplateType;
 
-        if (data) {
-            return data;
-
-        } else {
-
-            return null;
-        }
+        return data;
     } catch (error) {
         console.error(error);
 
@@ -100,16 +90,18 @@ export async function CopyTemplate(template: any) {
 
 export async function getTemplate(id: string) {
     try {
-        const data = await templateModel.findById(id);
-
+        const data = await templateModel.findById(id) as TemplateType;
         if (data) {
+
             return data;
         } else {
 
             return null;
         }
+
     } catch (error) {
         console.error(error);
+
         return null;
     }
 }

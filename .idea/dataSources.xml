@@ -23,5 +23,12 @@
       <jdbc-url>jdbc:redis://222.252.10.203:31121/0</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="Itss2-reminder" uuid="d9f0e2f4-1fac-4ce3-8ca8-d3d63ce02b5d">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://222.252.10.203:32306/postgres</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

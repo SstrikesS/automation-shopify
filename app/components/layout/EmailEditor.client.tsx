@@ -8,6 +8,7 @@ export default function EmailTemplateEditor(props: { template: any }) {
 
     const emailEditorRef = useRef<EditorRef | null>(null);
     const template = props.template;
+    console.log(window.location.protocol + '//' + window.location.host + '/app/components/tools/custom.js')
     // const [preview, setPreview] = useState(false);
 
     // const saveDesign = () => {

@@ -1,4 +1,4 @@
-import { Layout, Page, Card, Text, InlineGrid, MediaCard, EmptyState } from "@shopify/polaris";
+import { Layout, Page, Card, Text, InlineGrid, MediaCard, EmptyState, InlineStack } from "@shopify/polaris";
 import { EditMajor, CircleCancelMajor, CirclePlusMajor } from '@shopify/polaris-icons';
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
@@ -15,44 +15,48 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const limit = 6;
 
     const shop = await storeModel.findOne({ myshopify_domain: session.shop })
-    const custom = await templateModel.find({
-        type: "Custom",
-        status: true,
-    }).limit(limit).skip(limit * (parseInt(page) - 1));
+    if (shop) {
+        const custom = await templateModel.find({
+            type: "Custom",
+            status: true,
+            store_id: shop.id,
+        }).limit(limit).skip(limit * (parseInt(page) - 1));
 
-    const count = await templateModel.find({
-        type: "Custom",
-        status: true,
-    }).countDocuments();
+        const count = await templateModel.find({
+            type: "Custom",
+            status: true,
+            store_id: shop.id,
+        }).countDocuments();
 
-    const recommend = await templateModel.find({
-        type: "Recommend",
-        status: true,
-    }).limit(limit - 1);
+        const recommend = await templateModel.find({
+            type: "Recommend",
+            status: true,
+        }).limit(4);
 
-    return json({
-        data: {
+        return json({
             custom,
             recommend,
-        },
-        currentPage: parseInt(page),
-        totalPage: Math.ceil(count / limit),
-        total: count,
-        shop: shop,
-    });
-}
+            currentPage: parseInt(page),
+            totalPage: Math.ceil(count / limit),
+            total: count,
+            shop: shop,
+        });
+    } else {
+        return null;
+    }
 
+}
 export default function TemplatesPage() {
     // Lay du lieu tu ham loader
     const navigate = useNavigate();
-    const { data } = useLoaderData<typeof loader>();
+    const data = useLoaderData<typeof loader>();
 
-    const EmptyTemplateState = ({ onAction }: any) => (
+    const EmptyTemplateState = () => (
         <EmptyState
             heading="Look like you don't have any templates yet"
             action={{
                 content: "Create template",
-                onAction,
+                onAction: () => { navigate(`../template/new`); },
             }}
             image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png">
             <p>Let's create a new one or explore our recommend templates</p>
@@ -72,21 +76,21 @@ export default function TemplatesPage() {
                             height: 'auto',
                             marginTop: "10px",
                         }}>
-                            <InlineGrid gap="300" columns={6}>
+                            <InlineStack wrap={false} gap="400">
                                 <div style={{
+                                    width: "270px",
                                     height: "320px",
-                                    width: "auto",
                                 }}>
                                     <MediaCard
                                         size="small"
                                         portrait
-                                        title="Blank template"
+                                        title="New template"
                                         primaryAction={{
                                             content: 'Create a new template',
                                             onAction: () => { navigate(`../template/new`); },
                                             icon: CirclePlusMajor,
                                         }}
-                                        description="Custom"
+                                        description="Blank"
                                     >
                                         <img
                                             alt=""
@@ -96,37 +100,44 @@ export default function TemplatesPage() {
                                                 objectFit: 'cover',
                                                 objectPosition: 'center',
                                             }}
-                                            src="">
+                                            src="https://wallpapers.com/images/featured/blank-white-7sn5o1woonmklx1h.jpg">
                                         </img>
                                     </MediaCard>
                                 </div>
-                                {data.recommend.map((value: any, key = 1) => (
-                                    <div key={key++}>
-                                        <MediaCard
-                                            size="small"
-                                            portrait
-                                            title={value.name}
-                                            primaryAction={{
-                                                content: 'Open and Edit',
-                                                onAction: () => { navigate(`../template/${value._id}`); },
-                                                icon: EditMajor,
-                                            }}
-                                            description={value.type}
-                                        >
-                                            <img
-                                                alt=""
-                                                width="100%"
-                                                height="180px"
-                                                style={{
-                                                    objectFit: 'cover',
-                                                    objectPosition: 'center',
-                                                }}
-                                                src={value.image}>
-                                            </img>
-                                        </MediaCard>
-                                    </div>
-                                ))}
-                            </InlineGrid>
+                                <div style={{
+                                    width: 'auto',
+                                    height: "320px",
+                                }}>
+                                    <InlineGrid gap="300" columns={4}>
+                                        {data?.recommend.map((value: any, key = 1) => (
+                                            <div key={key++}>
+                                                <MediaCard
+                                                    size="small"
+                                                    portrait
+                                                    title={value.name}
+                                                    primaryAction={{
+                                                        content: 'Open and Edit',
+                                                        onAction: () => { navigate(`../template/${value._id}`); },
+                                                        icon: EditMajor,
+                                                    }}
+                                                    description={value.type}
+                                                >
+                                                    <img
+                                                        alt=""
+                                                        width="100%"
+                                                        height="180px"
+                                                        style={{
+                                                            objectFit: 'cover',
+                                                            objectPosition: 'center',
+                                                        }}
+                                                        src={value.image}>
+                                                    </img>
+                                                </MediaCard>
+                                            </div>
+                                        ))}
+                                    </InlineGrid>
+                                </div>
+                            </InlineStack>
                         </div>
                     </Card>
                 </Layout.Section>
@@ -139,11 +150,11 @@ export default function TemplatesPage() {
 
                         </div>
 
-                        {data.custom.length === 0 ? (
-                            <EmptyTemplateState onAction={() => navigate("#")} />
+                        {data?.custom.length === 0 ? (
+                            <EmptyTemplateState />
                         ) : (
                             <InlineGrid gap="300" columns={6}>
-                                {data.custom.map((template: any, key = 1) => (
+                                {data?.custom.map((template: any, key = 1) => (
                                     <div key={key++}>
                                         <MediaCard
                                             portrait

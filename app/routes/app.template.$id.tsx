@@ -1,4 +1,4 @@
-import { json } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
 import { Card, Text } from "@shopify/polaris";
 import { ClientOnly } from "remix-utils/client-only";
 import EmailTemplateEditor from "~/components/layout/EmailEditor.client";
@@ -6,9 +6,7 @@ import { emptyTemplate } from "~/helpers";
 import storeModel from "~/models/store.model";
 import { authenticate } from "~/shopify.server";
 import { getTemplate, CopyTemplate, CreateTemplate } from "~/models/templates.model";
-import { useLoaderData, useNavigate } from "@remix-run/react";
-import SkeletonExample from "~/components/layout/SkeletonExample";
-
+import { useLoaderData } from "@remix-run/react";
 export async function loader({ request, params }: any) {
     const { session } = await authenticate.admin(request);
 
@@ -25,19 +23,23 @@ export async function loader({ request, params }: any) {
                 store_id: shop.id
             });
 
-            return json({
-                template: newTemplate,
-                navigate: true,
-            })
+            return redirect(`../template/${newTemplate?._id}`);
         }
 
         const template = await getTemplate(params.id);
 
         if (template) {
             if (template.type === "Recommend") {
-                const newTemplate = CopyTemplate(template);
+                const newTemplate = await CopyTemplate({
+                    name: template.name,
+                    image: template.image,
+                    data: template.data,
+                    status: true,
+                    type: "Custom",
+                    store_id: shop.id,
+                });
 
-                return json({ template: newTemplate, navigate: true, });
+                return redirect(`../template/${newTemplate?._id}`);
             } else {
 
                 return json({ template: template, navigate: false, });
@@ -52,41 +54,21 @@ export async function loader({ request, params }: any) {
 
 export default function TemplatePage() {
     const data = useLoaderData<typeof loader>();
-    const navigate = useNavigate();
 
-    if (data) {
-        if (data.navigate === true) {
-
-            return (
-                <div>
-                    <SkeletonExample />
+    return (
+        <div>
+            <Card>
+                <div style={{
+                    height: "80px",
+                }}>
+                    <Text variant="headingLg" as="h5" alignment="start">
+                        Edit Templates
+                    </Text>
                 </div>
-            )
-        } else {
-            return (
-                <div>
-                    <Card>
-                        <div style={{
-                            height: "80px",
-                        }}>
-                            <Text variant="headingLg" as="h5" alignment="start">
-                                Edit Templates
-                            </Text>
-                        </div>
-                        <ClientOnly fallback={null}>
-                            {() => <EmailTemplateEditor template={data.template} />}
-                        </ClientOnly>
-                    </Card>
-                </div >
-            )
-        }
-    } else {
-        navigate('/');
-
-        return (
-            <div>
-                <SkeletonExample />
-            </div>
-        )
-    }
+                <ClientOnly fallback={null}>
+                    {() => <EmailTemplateEditor template={data?.template} />}
+                </ClientOnly>
+            </Card>
+        </div >
+    )
 }

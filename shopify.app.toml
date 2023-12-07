@@ -2,7 +2,7 @@
 
 name = "email-automation"
 client_id = "25857dad7be5378e4b51382635d110f3"
-application_url = "https://general-meter-gazette-vc.trycloudflare.com"
+application_url = "https://image-plaintiff-directive-li.trycloudflare.com"
 embedded = true
 
 [access_scopes]
@@ -11,10 +11,10 @@ scopes = "write_products,read_products,read_customers"
 
 [auth]
 redirect_urls = [
-  "https://general-meter-gazette-vc.trycloudflare.com/auth/callback",
-  "https://general-meter-gazette-vc.trycloudflare.com/auth/shopify/callback",
-  "https://general-meter-gazette-vc.trycloudflare.com/api/auth/callback",
-  "https://general-meter-gazette-vc.trycloudflare.com/.shopify/graphiql/auth/callback"
+  "https://image-plaintiff-directive-li.trycloudflare.com/auth/callback",
+  "https://image-plaintiff-directive-li.trycloudflare.com/auth/shopify/callback",
+  "https://image-plaintiff-directive-li.trycloudflare.com/api/auth/callback",
+  "https://image-plaintiff-directive-li.trycloudflare.com/.shopify/graphiql/auth/callback"
 ]
 
 [webhooks]
