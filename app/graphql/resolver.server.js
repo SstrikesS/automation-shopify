@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import StoreModel from "~/models/store.model";
 import mongoose from "mongoose";
+import { templateModel } from "~/models/templates.model";
 
 export const verifyToken = async (bearerToken) => {
     if (!bearerToken) {
@@ -42,15 +43,26 @@ export const resolver = {
             throw new Error('Authentication Error');
         }
     },
-    getStore: async ({ input }, request) => {
-        const bearerToken = request.headers.authorization;
-        const isAuthenticated = await verifyToken(bearerToken);
-        if (isAuthenticated) {
-            const store = await StoreModel.findOne({ id: input.id });
-            return store;
-        } else {
-            throw new Error('Authentication Error');
-        }
+    getStoreByToken: async ({ input }, request) => {
+        // const bearerToken = request.headers.authorization;
+        // const isAuthenticated = await verifyToken(bearerToken);
+        // if (isAuthenticated) {
+        const store = await StoreModel.findOne({ accessToken: input.accessToken });
+        return store;
+        // } else {
+        //     throw new Error('Authentication Error');
+        // }
+    },
+
+    getStoreByID: async ({ input }, request) => {
+        // const bearerToken = request.headers.authorization;
+        // const isAuthenticated = await verifyToken(bearerToken);
+        // if (isAuthenticated) {
+        const store = await StoreModel.findOne({ _id: input.id });
+        return store;
+        // } else {
+        //     throw new Error('Authentication Error');
+        // }
     },
     getAdmin: async ({ input }, request) => {
         const bearerToken = request.headers.authorization;
@@ -61,6 +73,53 @@ export const resolver = {
         } else {
             throw new Error('Authentication Error');
         }
+    },
+    getTemplates: async ({ input }, request) => {
+        // const bearerToken = request.headers.authorization;
+        // const isAuthenticated = await verifyToken(bearerToken);
+        // if (isAuthenticated) {
+        const templates = await templateModel.find({
+            name: {
+                $regex: `.*${input.name}.*`,
+            },
+            type: input.type,
+            status: input.status,
+            store_id: input.store_id,
+        }).limit(input.limit).skip(input.limit * (parseInt(input.page) - 1));
+
+        const count = await templateModel.countDocuments({
+            name: {
+                $regex: `.*${input.name}.*`,
+            },
+            status: input.status,
+            type: "Custom",
+            store_id: input.store_id,
+        }).limit(input.limit).skip(input.limit * (parseInt(input.page) - 1));
+
+        return {
+            templates: templates,
+            currentPage: parseInt(input.page),
+            totalPage: Math.ceil(count / input.limit),
+            total: count,
+        };
+        // } else {
+        //     throw new Error('Authentication Error');
+        // }
+    },
+
+    getTemplate: async ({ input }, request) => {
+        // const bearerToken = request.headers.authorization;
+        // const isAuthenticated = await verifyToken(bearerToken);
+        // if (isAuthenticated) {
+        if (input.id === 'new') {
+            return null;
+        } else {
+            const template = await templateModel.findOne({ id: input.id, store_id: input.store_id });
+            return template;
+        }
+        // } else {
+        //     throw new Error('Authentication Error');
+        // }
     },
     login: async ({ input }, request) => {
         const { username, password } = input;
@@ -119,6 +178,53 @@ export const resolver = {
         } else {
             throw new Error('Authentication Error');
         }
+    },
+
+    createTemplate: async ({ input }, request) => {
+        // const bearerToken = request.headers.authorization;
+        // const isAuthenticated = await verifyToken(bearerToken);
+        // if (isAuthenticated) {
+        const { id, name, image, data, status, type, store_id } = input;
+
+        const newTemplate = await templateModel.create({
+            id: id,
+            name: name,
+            image: image,
+            data: data,
+            status: status,
+            type: type,
+            store_id: store_id
+        });
+        return newTemplate;
+        // } else {
+        //     throw new Error('Authentication Error');
+        // }
+
+    },
+    updateTemplate: async ({ input }, request) => {
+        // const bearerToken = request.headers.authorization;
+        // const isAuthenticated = await verifyToken(bearerToken);
+        // if (isAuthenticated) {
+        const { id, name, image, data, status } = input;
+
+        const updatedTemplate = await templateModel.findOneAndUpdate(
+            {
+                id: id
+            },
+            {
+                name: name,
+                image: image,
+                data: data,
+                status: status,
+            },
+            {
+                timestamps: true,
+            });
+        return updatedTemplate;
+        // } else {
+        //     throw new Error('Authentication Error');
+        // }
+
     },
     deleteAdmin: async ({ input }, request) => {
         const bearerToken = request.headers.authorization;

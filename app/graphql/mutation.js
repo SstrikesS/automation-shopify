@@ -38,3 +38,28 @@ export const CREATE_ADMIN = gql`
         }
     }
 `;
+export const CREATE_TEMPLATE = gql`
+    mutation CreateTemplate($input: CreateTemplateInput) {
+        createTemplate(input: $input) {
+            id
+            name
+            image
+            data
+            status
+            type
+            store_id
+        }
+    }
+`;
+
+export const UPDATE_TEMPLATE = gql`
+    mutation UpdateTemplate($input: UpdateTemplateInput) {
+        updateTemplate(input: $input) {
+            id
+            name
+            image
+            data
+            status
+        }
+    }
+`;

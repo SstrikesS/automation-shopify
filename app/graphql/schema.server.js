@@ -1,16 +1,50 @@
 const { buildSchema } = require("graphql")
 export const schema = buildSchema(`
+    scalar JSON
+    scalar Date
     input LoginInput {
         username: String
         password: String
     }
     
     input GetStoreInput {
-        id: String
+        id: String,
+        accessToken: String,
     }
     
     input GetAdminInput {
         id: String
+    }
+
+    input GetTemplateInput {
+        id: String!,
+        store_id: String!,
+    }
+
+    input QueryTemplateFilter {
+        name: String,
+        type: String,
+        status: Boolean,
+        store_id: String,
+        limit: Int,
+        page: Int,
+    }
+
+    input CreateTemplateInput{
+        id: String!,
+        name: String,
+        image: String,
+        data: JSON,
+        status: Boolean,
+        type: String,
+    }
+
+    input UpdateTemplateInput{
+        id: String!,
+        name: String,
+        image: String,
+        data: JSON,
+        status: Boolean,
     }
     
     input CreateAdminInput {
@@ -57,13 +91,35 @@ export const schema = buildSchema(`
         password: String,
         email: String
     }
+
+    type Template {
+        id: String,
+        name: String,
+        image: String,
+        data: JSON,
+        status: Boolean,
+        type: String,
+        store_id: String,
+        createdAt: Date,
+        updatedAt: Date,
+    }
+
+    type TemplatePaging {
+        templates: [Template],
+        currentPage: Int!,
+        totalPage: Int!,
+        total: Int!,
+    }
     
     type Query {
         hello: String
         getAllStores: [Store]
-        getStore(input: GetStoreInput): Store
+        getStoreByToken(input: GetStoreInput): Store
+        getStoreByID(input: GetStoreInput): Store
         getAllAdmins: [Admin]
         getAdmin(input: GetAdminInput): Admin
+        getTemplate(input: GetTemplateInput): Template
+        getTemplates(input: QueryTemplateFilter): TemplatePaging
     }
       
     type Mutation {
@@ -71,5 +127,7 @@ export const schema = buildSchema(`
         createAdmin(input: CreateAdminInput): Admin
         updateAdmin(input: UpdateAdminInput): Admin
         deleteAdmin(input: DeleteAdminInput): Admin
+        createTemplate(input: CreateTemplateInput): Template
+        updateTemplate(input: UpdateTemplateInput): Template
     }
 `)

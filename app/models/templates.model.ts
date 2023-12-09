@@ -4,7 +4,7 @@ import type { Document, Model } from "mongoose";
 const Schema = mongoose.Schema;
 
 export type TemplateType = {
-    _id?: any,
+    id?: String | null,
     name?: String | null,
     image?: String | null,
     data?: Record<string, any>,
@@ -16,6 +16,10 @@ export type TemplateType = {
 }
 
 export const TemplateSchema = new Schema<TemplateDocument, TemplateModel>({
+    id: {
+        type: String,
+        require: true,
+    },
     name: {
         type: String,
         require: true,
@@ -103,6 +107,29 @@ export async function getTemplate(id: string) {
         console.error(error);
 
         return null;
+    }
+}
+
+export async function saveTemplate(id: string, template: any) {
+    try {
+        await templateModel.findOneAndUpdate(
+            {
+                _id: id
+            },
+            {
+                name: template.name,
+                data: template.data,
+            },
+            {
+                timestamps: true,
+            }
+        ) as TemplateType;
+
+        return true;
+    } catch (error) {
+        console.error(error);
+
+        return false;
     }
 }
 

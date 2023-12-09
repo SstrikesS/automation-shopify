@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.8.7",
+    "@codemirror/lang-html": "^6.4.7",
     "@prisma/client": "^4.13.0",
     "@remix-run/node": "^2.0.0",
     "@remix-run/react": "^2.0.0",
@@ -31,13 +32,14 @@
     "@shopify/shopify-api": "^8.0.2",
     "@shopify/shopify-app-remix": "^2.1.0",
     "@shopify/shopify-app-session-storage-prisma": "^2.0.0",
+    "@uiw/react-codemirror": "^4.21.21",
     "axios": "^1.6.2",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
     "express": "^4.18.2",
-    "graphql": "^16.8.1",
-    "graphql-http": "^1.22.0",
+    "express-graphql": "^0.12.0",
+    "graphql": "^15.8.0",
     "isbot": "latest",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
@@ -46,7 +48,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-email-editor": "^1.7.9",
-    "remix-utils": "^7.3.0"
+    "remix-utils": "^7.3.0",
+    "ulid": "^2.3.0"
   },
   "devDependencies": {
     "@remix-run/dev": "^2.0.0",

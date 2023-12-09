@@ -1,64 +1,74 @@
-import { json, redirect } from "@remix-run/node";
-import { Card } from "@shopify/polaris";
+import { json } from "@remix-run/node";
+import { Page, Spinner } from "@shopify/polaris";
+// @ts-ignore
 import { ClientOnly } from "remix-utils/client-only";
 import EmailTemplateEditor from "~/components/layout/EmailEditor.client";
-import { emptyTemplate } from "~/helpers";
-import storeModel from "~/models/store.model";
 import { authenticate } from "~/shopify.server";
-import { getTemplate, CopyTemplate, CreateTemplate } from "~/models/templates.model";
 import { useLoaderData } from "@remix-run/react";
+import { GET_STORE_BY_TOKEN, GET_TEMPLATE } from "~/graphql/query";
+// @ts-ignore
+import { useQuery } from "@apollo/client";
 
 export async function loader({ request, params }: any) {
     const { session } = await authenticate.admin(request);
 
-    const shop = await storeModel.findOne({ myshopify_domain: session.shop })
-
-    if (shop) {
-        if (params.id === "new") {
-            const newTemplate = await CreateTemplate({
-                name: "undefined",
-                image: "",
-                data: emptyTemplate,
-                status: true,
-                type: "Custom",
-                store_id: shop.id
-            });
-
-            return redirect(`../template/${newTemplate?._id}`);
-        }
-
-        const template = await getTemplate(params.id);
-
-        if (template) {
-            if (template.type === "Recommend") {
-                const newTemplate = await CopyTemplate({
-                    name: template.name,
-                    image: template.image,
-                    data: template.data,
-                    status: true,
-                    type: "Custom",
-                    store_id: shop.id,
-                });
-                return redirect(`../template/${newTemplate?._id}`);
-            } else {
-                return json({ template: template, navigate: false, });
-            }
-        }
-
-        return null;
-    }
-
-    return null;
+    return json({
+        session,
+        id: params.id,
+    })
 }
 
 export default function TemplatePage() {
-    const data = useLoaderData<typeof loader>();
+    const { session, id } = useLoaderData<typeof loader>();
 
+    const { loading: storeLoading, error: storeError, data: storeData } = useQuery(GET_STORE_BY_TOKEN, {
+        variables: {
+            input: {
+                accessToken: session.accessToken,
+            }
+        }
+    });
+
+    const { loading: templateLoading, error: templateError, data: templateData } = useQuery(GET_TEMPLATE, {
+        variables: {
+            input: {
+                id: id,
+                store_id: storeData.getStoreByToken.id,
+            }
+        }
+    });
+
+    console.log(templateData);
+
+    if (storeLoading || templateLoading) {
         return (
-            <Card>
-                <ClientOnly fallback={null}>
-                {() => <EmailTemplateEditor template={data?.template} />}
-                    </ClientOnly>
-            </Card>
+            <Page fullWidth>
+                <Spinner></Spinner>
+            </Page>)
+    } else if (templateError || storeError) {
+        return (
+            (<Page fullWidth>
+                <p>An error occurred</p>
+            </Page>)
         )
+    } else {
+        return (
+            <Page fullWidth >
+                <ClientOnly fallback={null}>
+                    {() => <EmailTemplateEditor template={{
+                        id: templateData.getTemplate.id,
+                        name: templateData.getTemplate.name,
+                        image: templateData.getTemplate.image,
+                        data: templateData.getTemplate.data,
+                        status: templateData.getTemplate.status,
+                        type: templateData.getTemplate.type,
+                        store_id: templateData.getTemplate.store_id,
+                        createdAt: templateData.getTemplate.createdAt,
+                        updatedAt: templateData.getTemplate.updatedAt,
+                    }} />}
+                </ClientOnly>
+            </Page>
+        )
+    }
+
 }

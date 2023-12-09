@@ -3,53 +3,62 @@ import { EditMajor, CircleCancelMajor, CirclePlusMajor } from '@shopify/polaris-
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData, useNavigate } from "@remix-run/react";
-import { templateModel } from "~/models/templates.model";
 import { authenticate } from "~/shopify.server";
-import storeModel from "~/models/store.model";
+// @ts-ignore
+import { useQuery } from "@apollo/client";
+import { GET_STORE_BY_TOKEN, GET_TEMPLATES } from "~/graphql/query";
 
 // Loader dung de fetch du lieu
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request, params }: LoaderFunctionArgs) {
     const { session } = await authenticate.admin(request);
-    const url = new URL(request.url);
-    const page = url.searchParams.get("page") || '1';
-    const limit = 6;
 
-    const shop = await storeModel.findOne({ myshopify_domain: session.shop })
-    if (shop) {
-        const custom = await templateModel.find({
-            type: "Custom",
-            status: true,
-            store_id: shop.id,
-        }).limit(limit).skip(limit * (parseInt(page) - 1));
-
-        const count = await templateModel.find({
-            type: "Custom",
-            status: true,
-            store_id: shop.id,
-        }).countDocuments();
-
-        const recommend = await templateModel.find({
-            type: "Recommend",
-            status: true,
-        }).limit(4);
-
-        return json({
-            custom,
-            recommend,
-            currentPage: parseInt(page),
-            totalPage: Math.ceil(count / limit),
-            total: count,
-            shop: shop,
-        });
-    } else {
-        return null;
-    }
+    return json({
+        session,
+        page: params.page
+    });
 
 }
 export default function TemplatesPage() {
     // Lay du lieu tu ham loader
     const navigate = useNavigate();
-    const data = useLoaderData<typeof loader>();
+
+    const { session, page } = useLoaderData<typeof loader>();
+
+    const store = useQuery(GET_STORE_BY_TOKEN, {
+        variables: {
+            input: {
+                accessToken: session.accessToken,
+            }
+
+        }
+    });
+
+
+    const custom = useQuery(GET_TEMPLATES, {
+        variables: {
+            input: {
+                name: "",
+                status: true,
+                type: "Custom",
+                store_id: store.data?.getStoreByToken.id,
+                limit: 6,
+                page: page ? parseInt(page) : 1,
+            }
+        }
+    });
+
+    const recommend = useQuery(GET_TEMPLATES, {
+        variables: {
+            input: {
+                name: "",
+                status: true,
+                type: "Recommend",
+                store_id: "NULL",
+                limit: 4,
+                page: 1,
+            }
+        }
+    })
 
     const EmptyTemplateState = () => (
         <EmptyState
@@ -87,7 +96,7 @@ export default function TemplatesPage() {
                                         title="New template"
                                         primaryAction={{
                                             content: 'Create a new template',
-                                            onAction: () => { navigate(`../template/new`); },
+                                            onAction: () => { navigate(`../new_template/new`); },
                                             icon: CirclePlusMajor,
                                         }}
                                         description="Blank"
@@ -109,7 +118,7 @@ export default function TemplatesPage() {
                                     height: "320px",
                                 }}>
                                     <InlineGrid gap="300" columns={4}>
-                                        {data?.recommend.map((value: any, key = 1) => (
+                                        {recommend.data?.getTemplates.templates.map((value: any, key = 1) => (
                                             <div key={key++}>
                                                 <MediaCard
                                                     size="small"
@@ -117,7 +126,7 @@ export default function TemplatesPage() {
                                                     title={value.name}
                                                     primaryAction={{
                                                         content: 'Open and Edit',
-                                                        onAction: () => { navigate(`../template/${value._id}`); },
+                                                        onAction: () => { navigate(`../new_template/${value.id}`); },
                                                         icon: EditMajor,
                                                     }}
                                                     description={value.type}
@@ -149,12 +158,11 @@ export default function TemplatesPage() {
                         }}>
 
                         </div>
-
-                        {data?.custom.length === 0 ? (
+                        {custom.data?.getTemplates.length === 0 ? (
                             <EmptyTemplateState />
                         ) : (
                             <InlineGrid gap="300" columns={6}>
-                                {data?.custom.map((template: any, key = 1) => (
+                                {custom.data?.getTemplates.templates.map((template: any, key = 1) => (
                                     <div key={key++}>
                                         <MediaCard
                                             portrait
@@ -162,7 +170,7 @@ export default function TemplatesPage() {
                                             primaryAction={{
                                                 content: 'Edit',
                                                 onAction: () => {
-                                                    navigate(`../template/${template._id}`);
+                                                    navigate(`../template/${template.id}`);
                                                 },
                                                 icon: EditMajor,
                                             }}
@@ -188,8 +196,7 @@ export default function TemplatesPage() {
                                     </div>
                                 ))}
                             </InlineGrid>
-                        )
-                        }
+                        )}
                     </Card>
                 </Layout.Section>
             </Layout>
