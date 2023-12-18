@@ -129,3 +129,22 @@ export const GET_TEMPLATES = gql`
         }
     }
 `;
+
+export const SEARCH_TEMPLATES = gql`
+    query SearchTemplate($input: QueryTemplateFilter) {
+        searchTemplate(input: $input) {
+            templates {
+                id
+                name
+                image
+                data
+                status
+                type
+                store_id
+                createdAt
+                updatedAt
+            }
+        }
+    }
+`;
+

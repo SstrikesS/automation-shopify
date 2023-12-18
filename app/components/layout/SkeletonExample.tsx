@@ -8,9 +8,9 @@ import {
 } from '@shopify/polaris';
 import React from 'react';
 
-export default function SkeletonExample() {
+export default function SkeletonLayout() {
     return (
-        <SkeletonPage primaryAction>
+        <SkeletonPage primaryAction>a
             <Layout>
                 <Layout.Section>
                     <LegacyCard sectioned>

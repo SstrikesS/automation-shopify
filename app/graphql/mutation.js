@@ -17,7 +17,7 @@ export const DELETE_ADMIN = gql`
             email
         }
     }
-`
+`;
 
 export const UPDATE_ADMIN = gql`
     mutation UpdateAdmin($input: UpdateAdminInput) {

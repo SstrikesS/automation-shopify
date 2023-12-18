@@ -85,7 +85,9 @@ export const resolver = {
             type: input.type,
             status: input.status,
             store_id: input.store_id,
-        }).limit(input.limit).skip(input.limit * (parseInt(input.page) - 1));
+        }).limit(input.limit).skip(input.limit * (parseInt(input.page) - 1)).sort({
+            [input.sort_column]: input.sort_value,
+        });
 
         const count = await templateModel.countDocuments({
             name: {
@@ -94,7 +96,7 @@ export const resolver = {
             status: input.status,
             type: "Custom",
             store_id: input.store_id,
-        }).limit(input.limit).skip(input.limit * (parseInt(input.page) - 1));
+        });
 
         return {
             templates: templates,
@@ -117,6 +119,23 @@ export const resolver = {
             const template = await templateModel.findOne({ id: input.id, store_id: input.store_id });
             return template;
         }
+        // } else {
+        //     throw new Error('Authentication Error');
+        // }
+    },
+
+    searchTemplate: async ({ input }, request) => {
+        // const bearerToken = request.headers.authorization;
+        // const isAuthenticated = await verifyToken(bearerToken);
+        // if (isAuthenticated) {
+        const templates = await templateModel.find({
+            name: {
+                $regex: `.*${input.name}.*`,
+            },
+
+        }).limit(input.limit).skip(input.limit * (parseInt(input.page) - 1)).sort({
+            [input.sort_column]: input.sort_value,
+        });
         // } else {
         //     throw new Error('Authentication Error');
         // }

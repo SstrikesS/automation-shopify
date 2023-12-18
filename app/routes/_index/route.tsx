@@ -9,7 +9,7 @@ import {
     FormLayout,
     TextField,
     Card,
-    Spinner
+    Spinner,
 } from "@shopify/polaris";
 import { useState } from "react";
 // @ts-ignore
@@ -91,6 +91,6 @@ export default function App() {
                     </Card>
                 </Page>
             </div>
-        </AppProvider>
+        </AppProvider >
     )
 }

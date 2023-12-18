@@ -1,5 +1,5 @@
 import { json } from "@remix-run/node";
-import { Page, Spinner } from "@shopify/polaris";
+import { Page } from "@shopify/polaris";
 // @ts-ignore
 import { ClientOnly } from "remix-utils/client-only";
 import EmailTemplateEditor from "~/components/layout/EmailEditor.client";
@@ -8,6 +8,7 @@ import { useLoaderData } from "@remix-run/react";
 import { GET_STORE_BY_TOKEN, GET_TEMPLATE } from "~/graphql/query";
 // @ts-ignore
 import { useQuery } from "@apollo/client";
+import SpinnerLayout from "~/components/layout/Spinner";
 
 export async function loader({ request, params }: any) {
     const { session } = await authenticate.admin(request);
@@ -43,13 +44,14 @@ export default function TemplatePage() {
     if (storeLoading || templateLoading) {
         return (
             <Page fullWidth>
-                <Spinner></Spinner>
-            </Page>)
+                <SpinnerLayout/>
+            </Page>
+        )
     } else if (templateError || storeError) {
         return (
-            (<Page fullWidth>
+            <Page fullWidth>
                 <p>An error occurred</p>
-            </Page>)
+            </Page>
         )
     } else {
         return (
@@ -70,5 +72,4 @@ export default function TemplatePage() {
             </Page>
         )
     }
-
 }

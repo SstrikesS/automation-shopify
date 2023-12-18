@@ -1,24 +1,20 @@
 import { json } from "@remix-run/node";
 import {
-    useLoaderData,
-    useSubmit,
+    useLoaderData, useNavigate,
 } from "@remix-run/react";
 import {
     Page,
-    Card,
-    Button,
-    Form,
-    FormLayout,
-    TextField,
-    BlockStack,
 } from "@shopify/polaris";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 
 import { authenticate } from "../shopify.server";
 import StoreModel from "~/models/store.model";
 import axios from "axios";
+import { useEffect } from "react";
+import SpinnerLayout from "~/components/layout/Spinner";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
+
     const { session } = await authenticate.admin(request);
     let shop;
     const config = {
@@ -32,6 +28,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         config
     );
     shop = shop.data.shop;
+
     const shopData = await StoreModel.findOneAndUpdate(
         {
             id: shop.id
@@ -65,147 +62,17 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export default function Index() {
+    useLoaderData<any>();
+    const navigate = useNavigate();
 
-    const { shop } = useLoaderData<any>();
-    const submit = useSubmit();
+    useEffect(() => {
+        navigate('../app/templates');
+
+    }, [navigate]);
 
     return (
         <Page>
-            <BlockStack gap="500">
-                <Card>
-                    <Form onSubmit={() => submit({}, { replace: true, method: "GET" })}>
-                        <FormLayout>
-                            <TextField
-                                label="Shop id"
-                                value={shop.id}
-                                type="password"
-                                autoComplete="text"
-                            />
-
-                            <TextField
-                                label="Shop name"
-                                value={shop.name}
-                                type="text"
-                                autoComplete="text"
-                            />
-
-                            <TextField
-                                label="Shop email"
-                                value={shop.email}
-                                type="email"
-                                autoComplete="email"
-                            />
-
-                            <TextField
-                                label="Shop domain"
-                                value={shop.domain}
-                                type="text"
-                                autoComplete="text"
-                            />
-
-                            <TextField
-                                label="Shop scope"
-                                value={shop.domain}
-                                type="text"
-                                autoComplete="text"
-                            />
-
-                            <TextField
-                                label="Shop country"
-                                value={shop.domain}
-                                type="text"
-                                autoComplete="text"
-                            />
-
-                            <TextField
-                                label="Shop customer email"
-                                value={shop.domain}
-                                type="text"
-                                autoComplete="text"
-                            />
-
-                            <TextField
-                                label="Shop my shopify domain"
-                                value={shop.myshopify_domain}
-                                type="text"
-                                autoComplete="text"
-                            />
-
-                            <TextField
-                                label="Shop plan name"
-                                value={shop.plan_name}
-                                type="text"
-                                autoComplete="text"
-                            />
-
-                            <TextField
-                                label="Shop plan display name"
-                                value={shop.plan_display_name}
-                                type="text"
-                                autoComplete="text"
-                            />
-
-                            <TextField
-                                label="Shop shop owner"
-                                value={shop.shop_owner}
-                                type="text"
-                                autoComplete="text"
-                            />
-
-                            <TextField
-                                label="Shop iana timezone"
-                                value={shop.iana_timezone}
-                                type="text"
-                                autoComplete="text"
-                            />
-
-                            <TextField
-                                label="Shop currency"
-                                value={shop.currency}
-                                type="text"
-                                autoComplete="text"
-                            />
-
-                            <TextField
-                                label="Shop address1"
-                                value={shop.address1}
-                                type="text"
-                                autoComplete="text"
-                            />
-
-                            <TextField
-                                label="Shop address2"
-                                value={shop.address2}
-                                type="text"
-                                autoComplete="text"
-                            />
-
-                            <TextField
-                                label="Shop phone"
-                                value={shop.phone}
-                                type="text"
-                                autoComplete="text"
-                            />
-
-                            <TextField
-                                label="Shop created at"
-                                value={shop.created_at}
-                                type="text"
-                                autoComplete="text"
-                            />
-
-                            <TextField
-                                label="Shop access token"
-                                value={shop.accessToken}
-                                type="text"
-                                autoComplete="text"
-                            />
-
-                            <Button submit>Submit</Button>
-                        </FormLayout>
-                    </Form>
-                </Card>
-            </BlockStack>
+            <SpinnerLayout />
         </Page>
     );
 }

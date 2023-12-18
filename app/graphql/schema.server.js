@@ -26,21 +26,28 @@ export const schema = buildSchema(`
         type: String,
         status: Boolean,
         store_id: String,
+        sort_column: String,
+        sort_value: String,
         limit: Int,
         page: Int,
     }
 
+    input QuerySearchFilter{
+        name: String,
+    }
+
     input CreateTemplateInput{
-        id: String!,
+        id: String,
         name: String,
         image: String,
         data: JSON,
         status: Boolean,
         type: String,
+        store_id: String,
     }
 
     input UpdateTemplateInput{
-        id: String!,
+        id: String,
         name: String,
         image: String,
         data: JSON,
@@ -120,6 +127,7 @@ export const schema = buildSchema(`
         getAdmin(input: GetAdminInput): Admin
         getTemplate(input: GetTemplateInput): Template
         getTemplates(input: QueryTemplateFilter): TemplatePaging
+        searchTemplate(input: QuerySearchFilter): [Template]
     }
       
     type Mutation {

@@ -2,7 +2,7 @@
 
 name = "email-automation"
 client_id = "25857dad7be5378e4b51382635d110f3"
-application_url = "https://rendered-rosa-prohibited-valley.trycloudflare.com"
+application_url = "https://u-tracks-result-courses.trycloudflare.com"
 embedded = true
 
 [access_scopes]
@@ -11,10 +11,10 @@ scopes = "write_products,read_products,read_customers"
 
 [auth]
 redirect_urls = [
-  "https://rendered-rosa-prohibited-valley.trycloudflare.com/auth/callback",
-  "https://rendered-rosa-prohibited-valley.trycloudflare.com/auth/shopify/callback",
-  "https://rendered-rosa-prohibited-valley.trycloudflare.com/api/auth/callback",
-  "https://rendered-rosa-prohibited-valley.trycloudflare.com/.shopify/graphiql/auth/callback"
+  "https://u-tracks-result-courses.trycloudflare.com/auth/callback",
+  "https://u-tracks-result-courses.trycloudflare.com/auth/shopify/callback",
+  "https://u-tracks-result-courses.trycloudflare.com/api/auth/callback",
+  "https://u-tracks-result-courses.trycloudflare.com/.shopify/graphiql/auth/callback"
 ]
 
 [webhooks]

@@ -1,5 +1,5 @@
 import { json } from "@remix-run/node";
-import { Page, Spinner } from "@shopify/polaris";
+import { Page } from "@shopify/polaris";
 import { ulid } from "ulid";
 import { authenticate } from "~/shopify.server";
 import { useLoaderData, useNavigate } from "@remix-run/react";
@@ -8,6 +8,7 @@ import { useMutation, useQuery } from "@apollo/client";
 import { GET_STORE_BY_TOKEN, GET_TEMPLATE } from "~/graphql/query";
 import { CREATE_TEMPLATE } from "~/graphql/mutation";
 import { useEffect } from "react";
+import SpinnerLayout from "~/components/layout/Spinner";
 
 export async function loader({ request, params }: any) {
     const { session } = await authenticate.admin(request);
@@ -36,9 +37,9 @@ export default function TemplatePage() {
                 variables: {
                     input: {
                         id: ulid(),
-                        name: templateData.getTemplate.name,
-                        image: null,
-                        data: templateData.getTemplate.name,
+                        name: "Copy of " + templateData.getTemplate.name,
+                        image: templateData.getTemplate.image,
+                        data: templateData.getTemplate.data,
                         status: true,
                         type: "Custom",
                         store_id: storeData?.getStoreByToken.id,
@@ -54,7 +55,6 @@ export default function TemplatePage() {
 
     const BlankTemplate = async () => {
         try {
-            console.log('Blank')
             const { data: newTemplateData } = await createTemplate({
                 variables: {
                     input: {
@@ -69,7 +69,6 @@ export default function TemplatePage() {
                 }
             });
             const templateId = newTemplateData.createTemplate.id;
-            console.log(newTemplateData.createTemplate);
             navigate(`../template/${templateId}`);
         } catch (err) {
             console.log(err);
@@ -80,45 +79,33 @@ export default function TemplatePage() {
         variables: {
             input: {
                 id: id,
-                store_id: storeData.getStoreByToken.id,
+                store_id: "NULL",
             }
         }
     });
 
     const [createTemplate] = useMutation(CREATE_TEMPLATE, {
         update(cache, { data: { createTemplate } }) {
-            // Read the data from the cache for the appropriate query
-            const { getTemplate }: any = cache.readQuery({
-                query: GET_TEMPLATE,
-                variables: {
-                    input: {
-                        id: id,
-                        store_id: storeData.getStoreByToken.id,
-                    },
-                },
+            const templateId = id; // Replace with the correct template ID
+            const templateKey = cache.identify({
+                __typename: 'Template',
+                id: templateId,
+                store_id: storeData.getStoreByToken.id,
             });
 
-            // Update the template data in the cache with the new template
-            cache.writeQuery({
-                query: GET_TEMPLATE,
-                variables: {
-                    input: {
-                        id: id,
-                        store_id: storeData.getStoreByToken.id,
-                    },
-                },
-                data: {
-                    getTemplate: {
-                        ...getTemplate,
-                        data: createTemplate.data,
+            cache.modify({
+                id: templateKey,
+                fields: {
+                    data(existingData = null) {
+                        return createTemplate.data || existingData;
                     },
                 },
             });
         },
     });
 
-    useEffect(() => {
 
+    useEffect(() => {
         if (!storeLoading && !templateLoading) {
             if (id === 'new') {
                 BlankTemplate();
@@ -126,26 +113,20 @@ export default function TemplatePage() {
                 DuplicateTemplate();
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [storeLoading, templateLoading, templateData, id]);
 
-    if (storeLoading || templateLoading || !templateData.getTemplate) {
+    if (templateError || storeError) {
         return (
             <Page fullWidth>
-                <Spinner></Spinner>
-            </Page>
-        )
-    } else if (templateError || storeError) {
-        return (
-            (<Page fullWidth>
                 <p>An error occurred</p>
-            </Page>)
+            </Page>
         )
     } else {
         return (
             <Page fullWidth>
-                <Spinner></Spinner>
+                <SpinnerLayout />
             </Page>
         )
     }
-
 }

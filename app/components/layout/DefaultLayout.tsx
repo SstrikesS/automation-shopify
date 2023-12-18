@@ -1,7 +1,8 @@
+
 import { useNavigate } from "@remix-run/react";
 import { ActionList, Frame, Icon, Text, TopBar } from "@shopify/polaris";
 import { SettingsMinor, QuestionMarkMajor, ArrowRightMinor } from "@shopify/polaris-icons";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getMerchantInitials } from "~/helpers";
 interface DefaultLayoutProps {
     children: any;
@@ -15,6 +16,36 @@ export default function DefaultLayout({ children, handleLogout, shop }: DefaultL
     const [isSecondaryMenuOpen, setIsSecondaryMenuOpen] = useState(false);
     const [isSearchActive, setIsSearchActive] = useState(false);
     const [searchValue, setSearchValue] = useState('');
+    const timeoutRef = useRef<number | null>(null);
+    const [searchResultsMarkup, setSearchResultsMarkup] = useState(
+        <ActionList
+            items={[{ content: 'Shopify help center' }, { content: 'Community forums' }]}
+        />
+    )
+
+    useEffect(() => {
+        // Clear the previous timeout
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+        }
+
+        if (searchValue.length > 0) {
+            // Set a new timeout to check for inactivity after 1 second
+            timeoutRef.current = setTimeout(() => {
+                setIsSearchActive(true);
+            }, 1000) as any; // Bypass type checking
+        } else {
+            // If searchValue is empty, set isSearchActive to false immediately
+            setIsSearchActive(false);
+        }
+        // Clean up the timeout on component unmount
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+        };
+    }, [searchValue]);
+
     const [shopData, setShopData] = useState({
         shop_owner: "undefined",
         myshopify_domain: "#",
@@ -41,7 +72,7 @@ export default function DefaultLayout({ children, handleLogout, shop }: DefaultL
 
     const handleSearchChange = useCallback((value: string) => {
         setSearchValue(value);
-        setIsSearchActive(value.length > 0);
+        setIsSearchActive(false);
     }, []);
 
     const handleNavigationToggle = useCallback(() => {
@@ -85,11 +116,6 @@ export default function DefaultLayout({ children, handleLogout, shop }: DefaultL
         />
     );
 
-    const searchResultsMarkup = (
-        <ActionList
-            items={[{ content: 'Shopify help center' }, { content: 'Community forums' }]}
-        />
-    );
 
     const searchFieldMarkup = (
         <TopBar.SearchField
