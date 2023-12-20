@@ -2,6 +2,7 @@ const { buildSchema } = require("graphql")
 export const schema = buildSchema(`
     scalar JSON
     scalar Date
+
     input LoginInput {
         username: String
         password: String
@@ -21,15 +22,24 @@ export const schema = buildSchema(`
         store_id: String!,
     }
 
+    input GetSampleTInput {
+        id: String!,
+    }
+
     input QueryTemplateFilter {
         name: String,
-        type: String,
         status: Boolean,
         store_id: String,
         sort_column: String,
         sort_value: String,
         limit: Int,
         page: Int,
+    }
+
+    input QuerySampleT_Filter {
+        status: Boolean,
+        sort_column: String,
+        sort_value: String,
     }
 
     input QuerySearchFilter{
@@ -44,6 +54,7 @@ export const schema = buildSchema(`
         status: Boolean,
         type: String,
         store_id: String,
+        base_template: String,
     }
 
     input UpdateTemplateInput{
@@ -99,13 +110,23 @@ export const schema = buildSchema(`
         email: String
     }
 
+    type SampleT {
+        id: String,
+        name: String,
+        image: String,
+        data: JSON,
+        status: Boolean,
+        download: Int,
+        createdAt: Date,
+        updatedAt: Date,
+    }
+
     type Template {
         id: String,
         name: String,
         image: String,
         data: JSON,
         status: Boolean,
-        type: String,
         store_id: String,
         createdAt: Date,
         updatedAt: Date,
@@ -127,6 +148,8 @@ export const schema = buildSchema(`
         getAdmin(input: GetAdminInput): Admin
         getTemplate(input: GetTemplateInput): Template
         getTemplates(input: QueryTemplateFilter): TemplatePaging
+        getSamplesT(input: QuerySampleT_Filter): [SampleT]
+        getSampleT(input: GetSampleTInput): SampleT
         searchTemplate(input: QuerySearchFilter): [Template]
     }
       

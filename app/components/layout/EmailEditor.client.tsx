@@ -40,7 +40,22 @@ export default function EmailTemplateEditor(props: { template: any }) {
     ) : null;
 
 
-    const [updateTemplate] = useMutation(UPDATE_TEMPLATE);
+    const [updateTemplate] = useMutation(UPDATE_TEMPLATE, {
+        update(cache, { data: { updateTemplate } }) {
+            cache.modify({
+                fields: {
+                    getTemplate(existingTemplates = [], { readField }) {
+                        return existingTemplates.map((template: any) => {
+                            if (readField('id', template) === updateTemplate.id) {
+                                return { ...template, ...updateTemplate };
+                            }
+                            return template;
+                        });
+                    },
+                },
+            });
+        },
+    });
 
     const saveDesign = async () => {
         const unlayer = emailEditorRef.current?.editor;
@@ -55,7 +70,7 @@ export default function EmailTemplateEditor(props: { template: any }) {
                 image: props.template.image,
             });
 
-            await updateTemplate({
+            const { data: update } = await updateTemplate({
                 variables: {
                     input: {
                         id: props.template.id,
@@ -66,6 +81,9 @@ export default function EmailTemplateEditor(props: { template: any }) {
                     }
                 }
             });
+
+            setName(update.updateTemplate.name);
+            setDesign(update.updateTemplate.data);
 
             console.log('Oke');
             toggleActiveToastSavingTimeout();
@@ -100,8 +118,8 @@ export default function EmailTemplateEditor(props: { template: any }) {
     const onLoad: EmailEditorProps['onLoad'] = (unlayer) => {
         console.log('onLoad', unlayer);
         unlayer.addEventListener('design:loaded', onDesignLoad);
-        if (props.template.data) {
-            unlayer.loadDesign(props.template.data);
+        if (design) {
+            unlayer.loadDesign(design);
         } else {
             unlayer.loadBlank();
         }

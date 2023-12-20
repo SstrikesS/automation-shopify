@@ -101,7 +101,6 @@ export const GET_TEMPLATE = gql`
             image
             data
             status
-            type
             store_id
             createdAt
             updatedAt
@@ -118,7 +117,6 @@ export const GET_TEMPLATES = gql`
                 image
                 data
                 status
-                type
                 store_id
                 createdAt
                 updatedAt
@@ -130,20 +128,47 @@ export const GET_TEMPLATES = gql`
     }
 `;
 
+export const GET_SAMPLEST = gql`
+    query GetSamplesT($input: QuerySampleT_Filter) {
+        getSamplesT(input: $input) {
+            id
+            name
+            image
+            data
+            status
+            download
+            createdAt
+            updatedAt
+        }
+    }
+`;
+
+export const GET_SAMPLET = gql`
+    query GetSampleT($input : GetSampleTInput) {
+        getSampleT(input: $input) {
+            id
+            name
+            image
+            data
+            status
+            download
+            createdAt
+            updatedAt
+        }
+    }
+`;
+
 export const SEARCH_TEMPLATES = gql`
     query SearchTemplate($input: QueryTemplateFilter) {
         searchTemplate(input: $input) {
-            templates {
-                id
-                name
-                image
-                data
-                status
-                type
-                store_id
-                createdAt
-                updatedAt
-            }
+            id
+            name
+            image
+            data
+            status
+            store_id
+            createdAt
+            updatedAt
         }
     }
 `;

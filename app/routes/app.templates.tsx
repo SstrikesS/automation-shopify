@@ -1,15 +1,15 @@
-import { Layout, Page, Card, Text, InlineGrid, MediaCard, EmptyState, InlineStack, Pagination } from "@shopify/polaris";
-import { EditMajor, CircleCancelMajor, CirclePlusMajor, ExploreImagesMajor } from '@shopify/polaris-icons';
+import { Layout, Page, Card, Text, InlineGrid, MediaCard, EmptyState, InlineStack, Pagination, Combobox, Icon, Select } from "@shopify/polaris";
+import { EditMajor, CircleCancelMajor, CirclePlusMajor, ExploreImagesMajor, SearchMinor } from '@shopify/polaris-icons';
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData, useNavigate } from "@remix-run/react";
 import { authenticate } from "~/shopify.server";
 // @ts-ignore
 import { useQuery } from "@apollo/client";
-import { GET_STORE_BY_TOKEN, GET_TEMPLATES } from "~/graphql/query";
+import { GET_SAMPLEST, GET_STORE_BY_TOKEN, GET_TEMPLATES } from "~/graphql/query";
 import SpinnerLayout from "~/components/layout/Spinner";
+import { useCallback, useState } from "react";
 
-// Loader dung de fetch du lieu
 export async function loader({ request, params }: LoaderFunctionArgs) {
     const { session } = await authenticate.admin(request);
     const url = new URL(request.url);
@@ -22,11 +22,22 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 }
 export default function TemplatesPage() {
-    // Lay du lieu tu ham loader
     const navigate = useNavigate();
-
     const { session, page } = useLoaderData<typeof loader>();
-    console.log(page);
+    const [selected, setSelected] = useState('createdAt/desc');
+
+    const handleSelectChange = useCallback(
+        (value: any) => {
+            setSelected(value);
+
+        }, [],);
+
+    const options = [
+        { label: 'Recent Added', value: 'createdAt/desc' },
+        { label: 'Last Updated', value: 'updateAt/asc' },
+        { label: 'Name A-Z', value: 'name/asc', },
+        { label: 'Name Z-A', value: 'name/desc' },
+    ];
     const { data: store, loading: storeLoading } = useQuery(GET_STORE_BY_TOKEN, {
         variables: {
             input: {
@@ -35,37 +46,28 @@ export default function TemplatesPage() {
 
         }
     });
-
     const { data: custom, loading: customLoading } = useQuery(GET_TEMPLATES, {
         variables: {
             input: {
                 name: "",
                 status: true,
-                type: "Custom",
                 store_id: store?.getStoreByToken.id,
                 limit: 6,
                 page: page ? parseInt(page) : 1,
-                sort_column: 'createdAt',
-                sort_value: 'desc',
+                sort_column: selected.split('/')[0],
+                sort_value: selected.split('/')[1],
             }
         }
     });
-
-    const { data: recommend, loading: recommendLoading } = useQuery(GET_TEMPLATES, {
+    const { data: recommend, loading: recommendLoading } = useQuery(GET_SAMPLEST, {
         variables: {
             input: {
-                name: "",
                 status: true,
-                type: "Recommend",
-                store_id: "NULL",
-                limit: 4,
-                page: 1,
-                sort_column: 'id',
-                sort_value: 'asc',
+                sort_column: 'download',
+                sort_value: 'desc',
             }
         }
     })
-
     const EmptyTemplateState = () => (
         <EmptyState
             heading="Look like you don't have any templates yet"
@@ -114,7 +116,7 @@ export default function TemplatesPage() {
                                                     onAction: () => { navigate(`../new_template/new`); },
                                                     icon: CirclePlusMajor,
                                                 }}
-                                                description="Blank"
+                                                description=""
                                             >
                                                 <img
                                                     alt=""
@@ -127,7 +129,7 @@ export default function TemplatesPage() {
                                                     src="https://wallpapers.com/images/featured/blank-white-7sn5o1woonmklx1h.jpg">
                                                 </img>
                                             </MediaCard>
-                                            {recommend?.getTemplates.templates.map((value: any, key = 1) => (
+                                            {recommend?.getSamplesT.slice(0, 4).map((value: any, key = 1) => (
                                                 <div key={key++}>
                                                     <MediaCard
                                                         size="small"
@@ -171,6 +173,30 @@ export default function TemplatesPage() {
                                 height: '50px',
                                 width: 'auto',
                             }}>
+                                <InlineGrid gap="500" columns={3}>
+                                    <div></div>
+                                    <Combobox
+                                        activator={
+                                            <Combobox.TextField
+                                                prefix={<Icon source={SearchMinor} />}
+
+                                                label="Search templates"
+                                                labelHidden
+
+                                                placeholder="Search templates"
+                                                autoComplete="off"
+                                            />
+                                        }
+                                    ></Combobox>
+
+                                    <Select
+                                        labelInline
+                                        label="Sort by"
+                                        options={options}
+                                        onChange={handleSelectChange}
+                                        value={selected}
+                                    />
+                                </InlineGrid>
 
                             </div>
                             {custom?.getTemplates.templates.length === 0 ? (

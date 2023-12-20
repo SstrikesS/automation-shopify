@@ -1,9 +1,13 @@
 
+// @ts-ignore
+import { useQuery } from "@apollo/client";
 import { useNavigate } from "@remix-run/react";
-import { ActionList, Frame, Icon, Text, TopBar } from "@shopify/polaris";
+import { ActionList, Card, Frame, Icon, Text, TopBar } from "@shopify/polaris";
 import { SettingsMinor, QuestionMarkMajor, ArrowRightMinor } from "@shopify/polaris-icons";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
+import { GET_TEMPLATES } from "~/graphql/query";
 import { getMerchantInitials } from "~/helpers";
+import SpinnerLayout from "./Spinner";
 interface DefaultLayoutProps {
     children: any;
     handleLogout: () => void;
@@ -15,36 +19,76 @@ export default function DefaultLayout({ children, handleLogout, shop }: DefaultL
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [isSecondaryMenuOpen, setIsSecondaryMenuOpen] = useState(false);
     const [isSearchActive, setIsSearchActive] = useState(false);
-    const [searchValue, setSearchValue] = useState('');
     const timeoutRef = useRef<number | null>(null);
+    const [searchValue, setSearchValue] = useState('');
+
+    const { data: custom, loading: customLoading } = useQuery(GET_TEMPLATES, {
+        variables: {
+            input: {
+                name: searchValue,
+                status: true,
+                store_id: `${shop.id}`,
+                limit: 6,
+                page: 1,
+                sort_column: 'name',
+                sort_value: 'asc',
+            }
+        }
+    });
+
     const [searchResultsMarkup, setSearchResultsMarkup] = useState(
-        <ActionList
-            items={[{ content: 'Shopify help center' }, { content: 'Community forums' }]}
-        />
+        <SpinnerLayout></SpinnerLayout>
     )
 
     useEffect(() => {
-        // Clear the previous timeout
         if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
         }
 
         if (searchValue.length > 0) {
-            // Set a new timeout to check for inactivity after 1 second
+            if (!isSearchActive) {
+                setIsSearchActive(true)
+            }
             timeoutRef.current = setTimeout(() => {
-                setIsSearchActive(true);
-            }, 1000) as any; // Bypass type checking
+                if (customLoading) {
+                    setSearchResultsMarkup(
+                        <SpinnerLayout></SpinnerLayout>
+                    );
+                } else if (custom?.getTemplates.templates.length === 0) {
+                    setSearchResultsMarkup(
+                        <p style={{ textAlign: 'center' }}>No result found</p>
+                    );
+                }
+                else {
+                    setSearchResultsMarkup(
+                        <ActionList
+                            items={custom?.getTemplates.templates.slice(0, 4).map((template: any) => ({
+                                content: template.name,
+                                helpText: "Template",
+                                image: template.image,
+                                onAction: () => { navigate(`app/template/${template.id}`) }
+                            }))}
+                        />
+                    );
+                }
+
+            }, 1000) as any;
+
         } else {
-            // If searchValue is empty, set isSearchActive to false immediately
+            setSearchResultsMarkup(
+                <SpinnerLayout></SpinnerLayout>
+            );
             setIsSearchActive(false);
         }
-        // Clean up the timeout on component unmount
+
         return () => {
             if (timeoutRef.current) {
                 clearTimeout(timeoutRef.current);
             }
         };
-    }, [searchValue]);
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [custom]);
 
     const [shopData, setShopData] = useState({
         shop_owner: "undefined",
@@ -72,7 +116,6 @@ export default function DefaultLayout({ children, handleLogout, shop }: DefaultL
 
     const handleSearchChange = useCallback((value: string) => {
         setSearchValue(value);
-        setIsSearchActive(false);
     }, []);
 
     const handleNavigationToggle = useCallback(() => {
@@ -154,7 +197,7 @@ export default function DefaultLayout({ children, handleLogout, shop }: DefaultL
             secondaryMenu={secondaryMenuMarkup}
             searchResultsVisible={isSearchActive}
             searchField={searchFieldMarkup}
-            searchResults={searchResultsMarkup}
+            searchResults={<Card>{searchResultsMarkup}</Card>}
             onSearchResultsDismiss={handleSearchResultsDismiss}
             onNavigationToggle={handleNavigationToggle}
         />

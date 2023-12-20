@@ -46,7 +46,6 @@ export const CREATE_TEMPLATE = gql`
             image
             data
             status
-            type
             store_id
         }
     }

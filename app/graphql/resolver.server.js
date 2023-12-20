@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import StoreModel from "~/models/store.model";
 import mongoose from "mongoose";
 import { templateModel } from "~/models/templates.model";
+import { sampleTemplateModel } from "~/models/sampleTemplates.model";
 
 export const verifyToken = async (bearerToken) => {
     if (!bearerToken) {
@@ -44,45 +45,32 @@ export const resolver = {
         }
     },
     getStoreByToken: async ({ input }, request) => {
-        // const bearerToken = request.headers.authorization;
-        // const isAuthenticated = await verifyToken(bearerToken);
-        // if (isAuthenticated) {
         const store = await StoreModel.findOne({ accessToken: input.accessToken });
+
         return store;
-        // } else {
-        //     throw new Error('Authentication Error');
-        // }
     },
 
     getStoreByID: async ({ input }, request) => {
-        // const bearerToken = request.headers.authorization;
-        // const isAuthenticated = await verifyToken(bearerToken);
-        // if (isAuthenticated) {
         const store = await StoreModel.findOne({ _id: input.id });
+
         return store;
-        // } else {
-        //     throw new Error('Authentication Error');
-        // }
     },
     getAdmin: async ({ input }, request) => {
         const bearerToken = request.headers.authorization;
         const isAuthenticated = await verifyToken(bearerToken);
         if (isAuthenticated) {
             const admin = await AdminModel.findOne({ _id: input.id });
+
             return admin;
         } else {
             throw new Error('Authentication Error');
         }
     },
     getTemplates: async ({ input }, request) => {
-        // const bearerToken = request.headers.authorization;
-        // const isAuthenticated = await verifyToken(bearerToken);
-        // if (isAuthenticated) {
         const templates = await templateModel.find({
             name: {
                 $regex: `.*${input.name}.*`,
             },
-            type: input.type,
             status: input.status,
             store_id: input.store_id,
         }).limit(input.limit).skip(input.limit * (parseInt(input.page) - 1)).sort({
@@ -94,7 +82,6 @@ export const resolver = {
                 $regex: `.*${input.name}.*`,
             },
             status: input.status,
-            type: "Custom",
             store_id: input.store_id,
         });
 
@@ -104,30 +91,37 @@ export const resolver = {
             totalPage: Math.ceil(count / input.limit),
             total: count,
         };
-        // } else {
-        //     throw new Error('Authentication Error');
-        // }
     },
 
     getTemplate: async ({ input }, request) => {
-        // const bearerToken = request.headers.authorization;
-        // const isAuthenticated = await verifyToken(bearerToken);
-        // if (isAuthenticated) {
         if (input.id === 'new') {
             return null;
         } else {
             const template = await templateModel.findOne({ id: input.id, store_id: input.store_id });
+
             return template;
         }
-        // } else {
-        //     throw new Error('Authentication Error');
-        // }
+    },
+
+    getSamplesT: async ({ input }, request) => {
+        const samples = await sampleTemplateModel.find({
+            status: input.status,
+        }).sort({
+            [input.sort_column]: input.sort_value,
+        });
+
+        return samples;
+    },
+
+    getSampleT: async ({ input }, request) => {
+        const samples = await sampleTemplateModel.findOne({
+            id: input.id
+        });
+
+        return samples;
     },
 
     searchTemplate: async ({ input }, request) => {
-        // const bearerToken = request.headers.authorization;
-        // const isAuthenticated = await verifyToken(bearerToken);
-        // if (isAuthenticated) {
         const templates = await templateModel.find({
             name: {
                 $regex: `.*${input.name}.*`,
@@ -136,10 +130,8 @@ export const resolver = {
         }).limit(input.limit).skip(input.limit * (parseInt(input.page) - 1)).sort({
             [input.sort_column]: input.sort_value,
         });
-        // } else {
-        //     throw new Error('Authentication Error');
-        // }
     },
+
     login: async ({ input }, request) => {
         const { username, password } = input;
 
@@ -200,10 +192,7 @@ export const resolver = {
     },
 
     createTemplate: async ({ input }, request) => {
-        // const bearerToken = request.headers.authorization;
-        // const isAuthenticated = await verifyToken(bearerToken);
-        // if (isAuthenticated) {
-        const { id, name, image, data, status, type, store_id } = input;
+        const { id, name, image, data, status, store_id, base_template } = input;
 
         const newTemplate = await templateModel.create({
             id: id,
@@ -211,19 +200,20 @@ export const resolver = {
             image: image,
             data: data,
             status: status,
-            type: type,
             store_id: store_id
         });
-        return newTemplate;
-        // } else {
-        //     throw new Error('Authentication Error');
-        // }
 
+        if (base_template) {
+            sampleTemplateModel.findOneAndUpdate(
+                { id: base_template },
+                { $inc: { download: 1 } }
+            );
+        }
+
+        return newTemplate;
     },
+
     updateTemplate: async ({ input }, request) => {
-        // const bearerToken = request.headers.authorization;
-        // const isAuthenticated = await verifyToken(bearerToken);
-        // if (isAuthenticated) {
         const { id, name, image, data, status } = input;
 
         const updatedTemplate = await templateModel.findOneAndUpdate(
@@ -239,11 +229,8 @@ export const resolver = {
             {
                 timestamps: true,
             });
-        return updatedTemplate;
-        // } else {
-        //     throw new Error('Authentication Error');
-        // }
 
+        return updatedTemplate;
     },
     deleteAdmin: async ({ input }, request) => {
         const bearerToken = request.headers.authorization;

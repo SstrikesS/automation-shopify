@@ -5,7 +5,7 @@ import { authenticate } from "~/shopify.server";
 import { useLoaderData, useNavigate } from "@remix-run/react";
 // @ts-ignore
 import { useMutation, useQuery } from "@apollo/client";
-import { GET_STORE_BY_TOKEN, GET_TEMPLATE } from "~/graphql/query";
+import { GET_SAMPLET, GET_STORE_BY_TOKEN } from "~/graphql/query";
 import { CREATE_TEMPLATE } from "~/graphql/mutation";
 import { useEffect } from "react";
 import SpinnerLayout from "~/components/layout/Spinner";
@@ -37,12 +37,12 @@ export default function TemplatePage() {
                 variables: {
                     input: {
                         id: ulid(),
-                        name: "Copy of " + templateData.getTemplate.name,
-                        image: templateData.getTemplate.image,
-                        data: templateData.getTemplate.data,
+                        name: "Copy of " + templateData.getSampleT.name,
+                        image: templateData.getSampleT.image,
+                        data: templateData.getSampleT.data,
                         status: true,
-                        type: "Custom",
                         store_id: storeData?.getStoreByToken.id,
+                        base_template: id,
                     }
                 }
             });
@@ -63,8 +63,8 @@ export default function TemplatePage() {
                         image: null,
                         data: null,
                         status: true,
-                        type: "Custom",
                         store_id: storeData?.getStoreByToken.id,
+                        base_template: null,
                     }
                 }
             });
@@ -75,11 +75,10 @@ export default function TemplatePage() {
         }
     }
 
-    const { loading: templateLoading, error: templateError, data: templateData } = useQuery(GET_TEMPLATE, {
+    const { loading: templateLoading, error: templateError, data: templateData } = useQuery(GET_SAMPLET, {
         variables: {
             input: {
                 id: id,
-                store_id: "NULL",
             }
         }
     });
@@ -109,7 +108,7 @@ export default function TemplatePage() {
         if (!storeLoading && !templateLoading) {
             if (id === 'new') {
                 BlankTemplate();
-            } else if (templateData.getTemplate?.type === "Recommend") {
+            } else if (templateData) {
                 DuplicateTemplate();
             }
         }

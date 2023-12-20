@@ -39,8 +39,6 @@ export default function TemplatePage() {
         }
     });
 
-    console.log(templateData);
-
     if (storeLoading || templateLoading) {
         return (
             <Page fullWidth>
@@ -63,7 +61,6 @@ export default function TemplatePage() {
                         image: templateData.getTemplate.image,
                         data: templateData.getTemplate.data,
                         status: templateData.getTemplate.status,
-                        type: templateData.getTemplate.type,
                         store_id: templateData.getTemplate.store_id,
                         createdAt: templateData.getTemplate.createdAt,
                         updatedAt: templateData.getTemplate.updatedAt,

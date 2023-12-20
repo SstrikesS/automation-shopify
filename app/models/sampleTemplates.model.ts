@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const Schema = mongoose.Schema;
 
-export const TemplateSchema = new Schema({
+export const SampleSchema = new Schema({
     id: {
         type: String,
         require: true,
@@ -23,17 +23,14 @@ export const TemplateSchema = new Schema({
         type: Boolean,
         require: true,
     },
-    type: {
-        type: String,
-        require: true,
-    },
-    store_id: {
-        type: String,
+    download: {
+        type: Number,
         require: true,
     }
 }, {
     timestamps: true,
 })
 
+export const sampleTemplateModel = mongoose.model('sampleTemplates', SampleSchema);
 
-export const templateModel = mongoose.model('templates', TemplateSchema);
+
