@@ -9,17 +9,38 @@ import ReactCodeMirror from "@uiw/react-codemirror";
 import { html } from '@codemirror/lang-html';
 // @ts-ignore
 import { useMutation } from "@apollo/client";
-import { UPDATE_TEMPLATE } from "~/graphql/mutation";
+import { DELETE_TEMPLATE, UPDATE_TEMPLATE } from "~/graphql/mutation";
+import { useNavigate } from "@remix-run/react";
 
 export default function EmailTemplateEditor(props: { template: any }) {
 
     const emailEditorRef = useRef<EditorRef | null>(null);
+
+    const navigate = useNavigate();
 
     const [htmlCode, setHTML] = useState("");
 
     const [activeHTML, setActiveHTML] = useState(false);
 
     const [editModal, setEditModal] = useState(false);
+
+    const [removeModal, setRemoveModal] = useState(false);
+
+    const toggleremoveModal = useCallback(() => setRemoveModal(removeModal => !removeModal), []);
+
+    const RemoveModalActivator = <Button variant="primary" tone='critical' onClick={toggleremoveModal}>Delete</Button>
+
+    const deleteTemplate = async () => {
+
+        await removeTemplate({
+            variables: {
+                input: {
+                    id: props.template.id
+                }
+            }
+        });
+        navigate(`../templates`);
+    };
 
     const [design, setDesign] = useState(props.template.data ?? undefined);
 
@@ -40,35 +61,14 @@ export default function EmailTemplateEditor(props: { template: any }) {
     ) : null;
 
 
-    const [updateTemplate] = useMutation(UPDATE_TEMPLATE, {
-        update(cache, { data: { updateTemplate } }) {
-            cache.modify({
-                fields: {
-                    getTemplate(existingTemplates = [], { readField }) {
-                        return existingTemplates.map((template: any) => {
-                            if (readField('id', template) === updateTemplate.id) {
-                                return { ...template, ...updateTemplate };
-                            }
-                            return template;
-                        });
-                    },
-                },
-            });
-        },
-    });
+    const [updateTemplate] = useMutation(UPDATE_TEMPLATE);
+    const [removeTemplate] = useMutation(DELETE_TEMPLATE);
 
     const saveDesign = async () => {
+
         const unlayer = emailEditorRef.current?.editor;
         unlayer?.saveDesign(async (data: any) => {
             setDesign(data);
-
-            console.log({
-                id: props.template.id,
-                name: name,
-                data: data,
-                status: props.template.status,
-                image: props.template.image,
-            });
 
             const { data: update } = await updateTemplate({
                 variables: {
@@ -84,7 +84,6 @@ export default function EmailTemplateEditor(props: { template: any }) {
 
             setName(update.updateTemplate.name);
             setDesign(update.updateTemplate.data);
-
             console.log('Oke');
             toggleActiveToastSavingTimeout();
 
@@ -221,7 +220,29 @@ export default function EmailTemplateEditor(props: { template: any }) {
                                             {HTMLPreview}
                                         </Modal.Section>
                                     </Modal>
-                                    <Button variant="primary" tone='critical'>Delete</Button>
+                                    <Modal
+                                        size="small"
+                                        activator={RemoveModalActivator}
+                                        open={removeModal}
+                                        onClose={toggleremoveModal}
+                                        title="Delete Template"
+                                        primaryAction={{
+                                            content: 'OK',
+                                            destructive: true,
+                                            onAction: deleteTemplate,
+                                        }}
+                                        secondaryActions={[
+                                            {
+                                                content: 'Cancel',
+                                                onAction: toggleremoveModal,
+                                            },
+                                        ]}
+                                    >
+                                        <Modal.Section>
+                                            Are you sure you want to delete this template?
+                                        </Modal.Section>
+
+                                    </Modal>
                                     {isSaving ? (
                                         <Button loading>Save</Button>
                                     ) : (
@@ -238,30 +259,24 @@ export default function EmailTemplateEditor(props: { template: any }) {
                 <Layout.Section>
                     <Card>
                         <EmailEditor
+                            projectId={207300}
                             ref={emailEditorRef}
                             onLoad={onLoad}
                             onReady={onReady}
                             minHeight={680}
                             options={{
-                                appearance: undefined,
                                 features: {
                                     preview: true,
                                     stockImages: true,
                                     undoRedo: true
-                                },
-                                translations: {
-                                    en: {
-                                        "tools.tabs.images": "Stock Images"
-                                    }
                                 },
                                 tools: {
                                     image: {
                                         enabled: true
                                     }
                                 },
-                                locale: "en-US",
                                 customJS: [
-                                    window.location.protocol + '//' + window.location.host + '/app/components/tools/custom.js',
+                                    window.location.protocol + "//" + window.location.host + "/custom.js",
                                 ],
                                 blocks: [
                                     ...ProductGrid,

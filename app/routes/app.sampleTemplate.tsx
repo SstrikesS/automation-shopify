@@ -26,13 +26,13 @@ export default function SampleTemplates() {
         const nextVisibleData = visibleData + 5;
         if (nextVisibleData >= recommend?.getSamplesT.length) {
             setShowMore(false);
-            setShowLess(true); 
+            setShowLess(true);
         }
         setVisibleData(nextVisibleData);
     }
     const handleShowLess = () => {
-        setVisibleData(5); 
-        setShowLess(false); 
+        setVisibleData(5);
+        setShowLess(false);
         setShowMore(true);
     }
 
@@ -76,7 +76,10 @@ export default function SampleTemplates() {
                                             }}
                                         >
                                             <img alt={item.name} src={item.image} width="auto" height="300px" />
-                                            <Text as="h2" variant="headingLg" alignment="center" >{item.name}</Text>
+                                            <Text as="h2" variant="headingLg" alignment="center">{
+                                                item.name.length > 25
+                                                    ? `${item.name.substring(0, 25)}...`
+                                                    : item.name}</Text>
                                             <div style={{ width: '100px', marginBottom: '15px', marginTop: '10px' }}>
                                                 <Button variant="primary" tone="success" fullWidth onClick={() => { navigate(`../new_template/${item.id}`); }}>
                                                     Get

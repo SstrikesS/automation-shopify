@@ -21,6 +21,7 @@ export default function DefaultLayout({ children, handleLogout, shop }: DefaultL
     const [isSearchActive, setIsSearchActive] = useState(false);
     const timeoutRef = useRef<number | null>(null);
     const [searchValue, setSearchValue] = useState('');
+    
 
     const { data: custom, loading: customLoading } = useQuery(GET_TEMPLATES, {
         variables: {
@@ -66,13 +67,13 @@ export default function DefaultLayout({ children, handleLogout, shop }: DefaultL
                                 content: template.name,
                                 helpText: "Template",
                                 image: template.image,
-                                onAction: () => { navigate(`app/template/${template.id}`) }
+                                onAction: () => { navigate(`../app/template/${template.id}`) }
                             }))}
                         />
                     );
                 }
 
-            }, 1000) as any;
+            }, 500) as any;
 
         } else {
             setSearchResultsMarkup(

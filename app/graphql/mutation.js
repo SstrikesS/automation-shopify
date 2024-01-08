@@ -62,3 +62,11 @@ export const UPDATE_TEMPLATE = gql`
         }
     }
 `;
+
+export const DELETE_TEMPLATE = gql`
+    mutation DeleteTemplate($input: DeleteTemplateInput) {
+        deleteTemplate(input: $input) {
+            id
+        }
+    }
+`

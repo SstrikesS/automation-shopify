@@ -121,17 +121,6 @@ export const resolver = {
         return samples;
     },
 
-    searchTemplate: async ({ input }, request) => {
-        const templates = await templateModel.find({
-            name: {
-                $regex: `.*${input.name}.*`,
-            },
-
-        }).limit(input.limit).skip(input.limit * (parseInt(input.page) - 1)).sort({
-            [input.sort_column]: input.sort_value,
-        });
-    },
-
     login: async ({ input }, request) => {
         const { username, password } = input;
 
@@ -227,11 +216,29 @@ export const resolver = {
                 status: status,
             },
             {
-                timestamps: true,
+                new: true,
+                upsert: true // Make this update into an upsert
             });
-
         return updatedTemplate;
     },
+
+    deleteTemplate: async ({ input }, request) => {
+        const { id } = input;
+
+        const deleteTemplate = await templateModel.findOneAndUpdate(
+            {
+                id: id
+            },
+            {
+                status: false
+            },
+            {
+                new: true,
+                upsert: true
+            });
+        return deleteTemplate;
+    },
+
     deleteAdmin: async ({ input }, request) => {
         const bearerToken = request.headers.authorization;
         const isAuthenticated = await verifyToken(bearerToken);

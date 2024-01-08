@@ -65,6 +65,10 @@ export const schema = buildSchema(`
         status: Boolean,
     }
     
+    input DeleteTemplateInput{
+        id: String,
+    }
+    
     input CreateAdminInput {
         username: String
         password: String
@@ -150,7 +154,6 @@ export const schema = buildSchema(`
         getTemplates(input: QueryTemplateFilter): TemplatePaging
         getSamplesT(input: QuerySampleT_Filter): [SampleT]
         getSampleT(input: GetSampleTInput): SampleT
-        searchTemplate(input: QuerySearchFilter): [Template]
     }
       
     type Mutation {
@@ -160,5 +163,6 @@ export const schema = buildSchema(`
         deleteAdmin(input: DeleteAdminInput): Admin
         createTemplate(input: CreateTemplateInput): Template
         updateTemplate(input: UpdateTemplateInput): Template
+        deleteTemplate(input: DeleteTemplateInput): Template
     }
 `)

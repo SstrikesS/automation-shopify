@@ -19,7 +19,7 @@
     "prisma": "prisma"
   },
   "dependencies": {
-    "@apollo/client": "^3.8.7",
+    "@apollo/client": "^3.8.8",
     "@codemirror/lang-html": "^6.4.7",
     "@prisma/client": "^4.13.0",
     "@remix-run/node": "^2.0.0",

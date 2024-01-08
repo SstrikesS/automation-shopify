@@ -158,18 +158,4 @@ export const GET_SAMPLET = gql`
     }
 `;
 
-export const SEARCH_TEMPLATES = gql`
-    query SearchTemplate($input: QueryTemplateFilter) {
-        searchTemplate(input: $input) {
-            id
-            name
-            image
-            data
-            status
-            store_id
-            createdAt
-            updatedAt
-        }
-    }
-`;
 
